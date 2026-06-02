@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>燕食记 · 书中美食</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4ECE0;--paper-2:#EDE3D4;--ink:#3A2E26;--ink-soft:#6B5B4F;
+    --line-soft:#D8C9B4;--gold:#B8893E;--rust:#C15F3C;--green:#6B7A56;--crimson:#7A2A1A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:"Noto Serif SC",serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.7;}
+
+  .nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;background:rgba(244,236,224,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);}
+  .nav .brand{font-family:"ZCOOL XiaoWei",serif;font-size:22px;letter-spacing:.12em;}
+  .nav .brand small{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.18em;margin-left:10px;text-transform:uppercase;}
+  .nav ul{display:flex;gap:6px;list-style:none;margin:0;padding:0;}
+  .nav a{text-decoration:none;color:var(--ink-soft);padding:6px 16px;border-radius:20px;font-size:15px;transition:.2s;}
+  .nav a:hover{color:var(--ink);background:var(--paper-2);}
+  .nav a.active{color:#fff;background:var(--rust);}
+
+  header.hd{text-align:center;padding:38px 20px 6px;}
+  header.hd h1{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(28px,4vw,44px);letter-spacing:.1em;margin:0 0 10px;font-weight:400;}
+  header.hd p{margin:0 auto;max-width:660px;color:var(--ink-soft);font-size:15px;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:960px;margin:24px auto 8px;padding:0 20px;}
+  .tab{font-family:"ZCOOL XiaoWei",serif;font-size:15px;letter-spacing:.08em;padding:7px 20px;border-radius:22px;
+    border:1px solid var(--line-soft);background:var(--paper);color:var(--ink-soft);cursor:pointer;transition:.2s;}
+  .tab .ct{font-family:"JetBrains Mono",monospace;font-size:11px;margin-left:6px;opacity:.7;}
+  .tab:hover{border-color:var(--gold);color:var(--ink);}
+  .tab.active{background:var(--rust);color:#fff;border-color:var(--rust);}
+
+  .grid{max-width:1140px;margin:22px auto 50px;padding:0 24px;
+    display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));}
+  .dish{background:var(--paper);border:1px solid var(--line-soft);border-radius:16px;overflow:hidden;
+    cursor:pointer;transition:.25s;box-shadow:0 8px 26px -20px rgba(58,46,38,.6);position:relative;}
+  .dish:hover{transform:translateY(-4px);box-shadow:0 16px 36px -18px rgba(58,46,38,.55);border-color:var(--gold);}
+  .dish .illus{background:linear-gradient(160deg,#F7F0E4,#EFE4D2);border-bottom:1px solid var(--line-soft);
+    display:flex;align-items:center;justify-content:center;padding:8px 14px;}
+  .dish .illus svg{width:100%;height:auto;max-height:160px;}
+  .dish .meta{padding:14px 18px 18px;}
+  .dish .cat{font-size:11px;font-family:"JetBrains Mono",monospace;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;}
+  .dish .dn{font-family:"ZCOOL XiaoWei",serif;font-size:20px;margin:4px 0 8px;letter-spacing:.05em;}
+  .dish .q{font-size:13px;color:var(--ink-soft);line-height:1.7;}
+  .dish .q::before{content:"“";color:var(--rust);}
+  .dish .q::after{content:"”";color:var(--rust);}
+
+  .overlay{position:fixed;inset:0;z-index:100;background:rgba(40,30,22,.5);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;padding:24px;}
+  .overlay.show{display:flex;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .card{width:min(620px,100%);max-height:88vh;overflow:auto;background:var(--paper);border-radius:18px;
+    border:1px solid var(--line-soft);box-shadow:0 30px 80px -20px rgba(0,0,0,.5);animation:rise .3s cubic-bezier(.2,.8,.2,1);}
+  @keyframes rise{from{transform:translateY(18px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .card .chero{background:linear-gradient(160deg,#F7F0E4,#EBDFCC);padding:18px;text-align:center;position:relative;border-bottom:1px solid var(--line-soft);}
+  .card .chero svg{width:220px;height:auto;}
+  .card .close{position:absolute;top:14px;right:16px;width:34px;height:34px;border:none;border-radius:50%;
+    background:var(--paper);color:var(--ink);font-size:20px;cursor:pointer;line-height:1;transition:.2s;}
+  .card .close:hover{background:var(--rust);color:#fff;}
+  .card .cbody{padding:22px 28px 30px;}
+  .card .ccat{font-size:11px;font-family:"JetBrains Mono",monospace;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;}
+  .card .ctitle{font-family:"ZCOOL XiaoWei",serif;font-size:30px;margin:4px 0 14px;letter-spacing:.06em;}
+  .card .quote{font-size:16px;color:var(--rust);border-left:3px solid var(--gold);padding-left:14px;margin:0 0 18px;font-style:italic;}
+  .card .sect{margin-top:18px;}
+  .card .sh{font-family:"ZCOOL XiaoWei",serif;font-size:15px;color:var(--gold);letter-spacing:.1em;margin:0 0 8px;}
+  .card .sect p{margin:0;font-size:14.5px;}
+  .card .tags{display:flex;flex-wrap:wrap;gap:8px;}
+  .card .tags span{font-size:12.5px;padding:4px 12px;border-radius:14px;background:var(--paper-2);border:1px solid var(--line-soft);color:var(--ink-soft);}
+
+  footer.src{max-width:880px;margin:0 auto;padding:0 24px 60px;font-size:12.5px;color:var(--ink-soft);line-height:1.9;text-align:center;}
+  footer.src h4{font-family:"ZCOOL XiaoWei",serif;color:var(--gold);font-size:14px;margin:0 0 6px;letter-spacing:.1em;}
+  .count{text-align:center;font-size:12.5px;color:var(--ink-soft);font-family:"JetBrains Mono",monospace;margin:4px 0 0;}
+
+  @media (max-width:820px){.nav{padding:12px 16px;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand">燕食记 <small>YANSHIJI</small></div>
+  <ul>
+    <li><a href="index.html">欢迎</a></li>
+    <li><a href="characters.html">人物关系</a></li>
+    <li><a href="cuisine.html" class="active">书中美食</a></li>
+  </ul>
+</nav>
+
+<header class="hd">
+  <h1>书中美食</h1>
+  <p>《燕食记》里近四十道粤菜、点心、素斋与本帮苏浙味。沿着茶点、蛇宴、素宴、粤味、本帮五条线索,把书中的滋味一一打开。</p>
+</header>
+
+<!-- 岭南纹样 + 古籍插图风共用渐变(全文档唯一,供所有插画引用) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="skinG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF4E6"/><stop offset="1" stop-color="#F2E4CB"/></linearGradient>
+  <linearGradient id="goldG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F0C97B"/><stop offset="1" stop-color="#C8922F"/></linearGradient>
+  <linearGradient id="brothG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3E6CC"/><stop offset="1" stop-color="#E3CB9C"/></linearGradient>
+  <linearGradient id="jadeG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#CFE0B8"/><stop offset="1" stop-color="#9DB87E"/></linearGradient>
+  <linearGradient id="meatG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A9663B"/><stop offset="1" stop-color="#6E3A1E"/></linearGradient>
+  <linearGradient id="fishG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#EAF0F1"/><stop offset="1" stop-color="#BCCFD1"/></linearGradient>
+  <linearGradient id="shrimpG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E89A7A"/><stop offset="1" stop-color="#C15F3C"/></linearGradient>
+  <linearGradient id="riceG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF6EC"/><stop offset="1" stop-color="#ECE2CE"/></linearGradient>
+  <linearGradient id="darkG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6B4327"/><stop offset="1" stop-color="#3A2212"/></linearGradient>
+  <linearGradient id="redG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D98A4A"/><stop offset="1" stop-color="#B5532A"/></linearGradient>
+  <linearGradient id="purpG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9B7BA8"/><stop offset="1" stop-color="#6E4F7E"/></linearGradient>
+  <radialGradient id="steamR" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+</defs></svg>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-cat="all">全部</button>
+  <button class="tab" data-cat="茶点">茶点<span class="ct">6</span></button>
+  <button class="tab" data-cat="蛇宴">蛇宴<span class="ct">6</span></button>
+  <button class="tab" data-cat="素宴">素宴<span class="ct">11</span></button>
+  <button class="tab" data-cat="其他">其他粤味<span class="ct">7</span></button>
+  <button class="tab" data-cat="本帮">本帮苏浙<span class="ct">10</span></button>
+</div>
+<p class="count" id="count"></p>
+
+<div class="grid" id="grid"></div>
+
+<footer class="src">
+  <h4>关于引文</h4>
+  美食页所引《燕食记》原文严格控制单次引用长度,卡片引语与详情多为意译、概括,保留必要的菜名与文化典故。素宴诸味多为「以素仿荤」的斋菜,菜名虽带荤字,实为豆制与菌蔬所制。
+</footer>
+
+<div class="overlay" id="overlay"><div class="card" id="card" role="dialog" aria-modal="true"></div></div>
+
+<script>
+/* ============ 古籍插图风 · SVG 构件库 ============ */
+const SV = inner => `<svg viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg" role="img">${inner}</svg>`;
+const ST = (x=98,y=58)=>`<g stroke="#B8893E" stroke-width="1.3" fill="none" opacity=".4" stroke-linecap="round"><path d="M${x} ${y} q-6 -11 2 -20 q7 -9 1 -18"/><path d="M${x+26} ${y-4} q6 -11 -2 -20 q-6 -9 0 -18"/></g>`;
+// 盘:rim + 内盘
+const PLATE = (fill="#F7F0E4")=>`<ellipse cx="120" cy="152" rx="88" ry="22" fill="#F0E5D0" stroke="#8A7058" stroke-width="2.2"/><ellipse cx="120" cy="148" rx="70" ry="16" fill="${fill}" stroke="#C9B79A" stroke-width="1.4"/>`;
+// 碗:body + 汤面
+const BOWL = (fill="url(#brothG)")=>`<path d="M50 126 q70 30 140 0 q-8 36 -70 40 q-62 -4 -70 -40Z" fill="#EFE4D0" stroke="#8A7058" stroke-width="2.4" stroke-linejoin="round"/><ellipse cx="120" cy="126" rx="70" ry="16" fill="${fill}" stroke="#8A7058" stroke-width="2.2"/>`;
+// 单字落款印章(右下角)
+const SEAL = ch=>`<g transform="translate(196,158)"><rect x="-13" y="-13" width="26" height="26" rx="3" fill="none" stroke="#C15F3C" stroke-width="1.6" opacity=".7"/><text x="0" y="6" font-family="ZCOOL XiaoWei,serif" font-size="16" fill="#C15F3C" opacity=".75" text-anchor="middle">${ch}</text></g>`;
+const dot=(x,y,r,f)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"/>`;
+
+/* ============ 40 道菜数据 ============ */
+const DISHES = [
+/* ───────── 一 · 茶点(6) ───────── */
+{cat:"茶点",name:"虾饺",seal:"虾",quote:"一只虾饺,十三道褶",
+ svg:SV(`${ST(96,54)}<ellipse cx="120" cy="158" rx="92" ry="22" fill="#EBDDC4" stroke="#8A7058" stroke-width="2"/><ellipse cx="120" cy="150" rx="92" ry="22" fill="#F3E8D2" stroke="#8A7058" stroke-width="2"/>
+ <path d="M58 132 q-6 -28 26 -40 q30 -11 58 -2 q22 7 24 22 q1 14 -16 22 q-30 14 -64 8 q-24 -4 -28 -10Z" fill="url(#skinG)" stroke="#8A7058" stroke-width="2.4" stroke-linejoin="round"/>
+ <path d="M82 120 q24 -14 50 -8 q14 4 16 12 q-26 8 -50 6 q-12 -2 -16 -10Z" fill="url(#shrimpG)" opacity=".55"/>
+ <g stroke="#7A6650" stroke-width="1.7" fill="none" stroke-linecap="round"><path d="M70 104 q4 -10 12 -12"/><path d="M84 98 q3 -10 11 -12"/><path d="M98 94 q3 -9 11 -11"/><path d="M112 92 q3 -9 11 -10"/><path d="M126 92 q4 -8 11 -8"/><path d="M139 95 q5 -6 12 -5"/></g>
+ <circle cx="116" cy="104" r="40" fill="url(#steamR)"/>${SEAL("虾")}`),
+ quoteFull:"一只虾饺,十三道褶",
+ desc:"皮要薄到透出里头粉红的虾,褶要数得清,蒸的火候差一线便塌。一笼好虾饺,见的是按板师傅的真功夫。",
+ ingredients:["鲜虾","澄面","笋粒","猪油","盐糖少许"],
+ method:"澄面以滚水烫熟搓皮,薄擀成圆；鲜虾拌笋,捏出十二三道褶成新月；猛火足汽蒸约五分钟,皮透即起。",
+ culture:"虾饺是粤式早茶的「试金石」,行内以褶数与皮的通透论高下。书中借它写按板一脉的手上分寸——克制而精到。"},
+
+{cat:"茶点",name:"嫁女饼(绫酥)",seal:"绫",quote:"绫酥层层,如嫁衣叠褶",
+ svg:SV(`${PLATE("#F7EBD6")}<g><ellipse cx="120" cy="118" rx="52" ry="30" fill="url(#skinG)" stroke="#B8893E" stroke-width="2"/>
+ <ellipse cx="120" cy="118" rx="40" ry="22" fill="none" stroke="#D8B877" stroke-width="1.3"/><ellipse cx="120" cy="118" rx="28" ry="15" fill="none" stroke="#D8B877" stroke-width="1.3"/><ellipse cx="120" cy="118" rx="15" ry="8" fill="none" stroke="#C8922F" stroke-width="1.3"/>
+ <g fill="#C15F3C" opacity=".5">${dot(108,114,1.3)}${dot(132,120,1.3)}${dot(120,110,1.3)}</g></g>${SEAL("绫")}`),
+ quoteFull:"绫酥层层,如嫁衣叠褶",
+ desc:"旧时女儿出阁的回礼饼,层层起酥,薄如绫罗。一口下去层叠在舌上散开,是甜里藏着的体面与祝祷。",
+ ingredients:["面粉","猪油起酥","糖冬瓜","椰丝","糖浆"],
+ method:"水油皮包油酥,反复擀叠出数十层；裹糖冬瓜椰丝馅,印模成形,中火烘至金黄起鳞。",
+ culture:"嫁女饼是岭南婚俗的礼数,绫酥取「绫罗绸缎」之意。书中以饼写人情往来,甜的是世故,也是温情。"},
+
+{cat:"茶点",name:"唐饼",seal:"唐",quote:"一饼一印,旧时甜",
+ svg:SV(`${PLATE("#F2E2C4")}<ellipse cx="120" cy="120" rx="48" ry="28" fill="url(#goldG)" stroke="#A8762A" stroke-width="2"/>
+ <g transform="translate(120,118)" fill="none" stroke="#7A5320" stroke-width="1.5" opacity=".75"><circle r="14"/><path d="M0 -14 V14 M-14 0 H14 M-10 -10 L10 10 M10 -10 L-10 10"/></g>${SEAL("唐")}`),
+ quoteFull:"一饼一印,旧时甜",
+ desc:"传统唐饼皮厚馅实,面上常印吉祥花纹。是茶楼里最家常的一味,朴拙却经得起反复回味。",
+ ingredients:["面粉","莲蓉/豆沙","糖","油"],
+ method:"和面包馅,压入饼模印出花纹,刷蛋液烘烤至面金底脆。",
+ culture:"唐饼是粤港中式饼食的统称,印纹多取「囍」「寿」之意。书中常以一笼唐饼,写市井安稳的日常底色。"},
+
+{cat:"茶点",name:"芋虾",seal:"芋",quote:"金丝结网,酥到化",
+ svg:SV(`${PLATE("#F4E6C9")}<g stroke="#C8922F" stroke-width="2" fill="none" stroke-linecap="round">
+ <path d="M80 124 q20 -34 60 -28 q24 4 22 24"/><path d="M86 130 q18 -28 54 -24"/><path d="M78 118 q26 -28 64 -18"/><path d="M92 134 q14 -22 44 -22"/><path d="M84 110 q22 -18 50 -10"/><path d="M100 122 q12 -16 34 -16"/></g>
+ <path d="M70 128 q50 22 100 0 q-6 16 -50 18 q-44 -2 -50 -18Z" fill="url(#goldG)" opacity=".35"/>${SEAL("芋")}`),
+ quoteFull:"金丝结网,酥到化",
+ desc:"荔浦芋头刨成细丝,挂浆炸成金黄蓬松的「虾巢」。形似虾却无虾,咬下满口酥香,是手上功夫的炫技。",
+ ingredients:["荔浦芋头","澄面","糖","油"],
+ method:"芋头刨丝拌粉浆,推入热油定型成蓬松网状,炸至金黄捞起沥油。",
+ culture:"芋虾以形取名而非用料,是粤点「以形寓意」的趣味。书中借它写厨人巧思——把寻常芋头做出虚张声势的体面。"},
+
+{cat:"茶点",name:"萝卜糕",seal:"糕",quote:"煎到两面,焦香起",
+ svg:SV(`${PLATE("#F3E7CD")}<g>
+ <rect x="74" y="106" width="40" height="30" rx="4" fill="url(#riceG)" stroke="#8A7058" stroke-width="2" transform="rotate(-4 94 121)"/>
+ <rect x="120" y="110" width="40" height="30" rx="4" fill="url(#riceG)" stroke="#8A7058" stroke-width="2" transform="rotate(5 140 125)"/>
+ <g fill="#C8922F" opacity=".5">${dot(86,118,1.6)}${dot(100,126,1.6)}${dot(94,110,1.6)}${dot(134,122,1.6)}${dot(148,130,1.6)}${dot(140,114,1.6)}</g>
+ <path d="M74 134 h40 M120 138 h40" stroke="#A8762A" stroke-width="2.5" stroke-linecap="round" opacity=".6"/></g>${SEAL("糕")}`),
+ quoteFull:"煎到两面,焦香起",
+ desc:"白萝卜刨丝混米浆蒸成糕,切块下镬煎到两面金黄。外脆里糯,夹着腊味与虾米的咸鲜,是岁晚必备。",
+ ingredients:["白萝卜","粘米粉","腊味","虾米","葱"],
+ method:"萝卜丝炒软拌米浆,加腊味虾米蒸熟成糕；放凉切块,平底镬煎至两面焦香。",
+ culture:"萝卜糕谐音「好彩头」,是粤式年节与早茶的常客。书中以一镬煎糕的焦香,写岁时人情的温热。"},
+
+{cat:"茶点",name:"潮汕粥",seal:"粥",quote:"米粒开花,水米交融",
+ svg:SV(`${ST(100,60)}${BOWL("url(#riceG)")}<g fill="#fff" stroke="#D8C9A8" stroke-width=".6">
+ ${dot(100,124,3)}${dot(116,120,3)}${dot(132,125,3)}${dot(108,128,3)}${dot(124,128,3)}${dot(140,122,3)}${dot(92,126,2.6)}</g>
+ <g fill="#6B7A56">${dot(112,123,1.4)}${dot(128,126,1.4)}${dot(104,127,1.4)}</g>
+ <ellipse cx="120" cy="124" rx="40" ry="9" fill="url(#steamR)"/>${SEAL("粥")}`),
+ quoteFull:"米粒开花,水米交融",
+ desc:"潮汕白粥讲究米粒粒开花却不烂,米汤稠而清。配一碟咸杂或鱼饭,是熨帖肠胃的家常温柔。",
+ ingredients:["大米","清水","配:咸菜/鱼饭"],
+ method:"米下滚水大火滚开,转中火不停搅至米粒绽开、米汤微稠即成,讲究「米水交融」。",
+ culture:"潮汕粥是岭南饮食里最朴素的一味,见的是对火候与米性的耐心。书中以一碗清粥,写漂泊里的安顿。"},
+
+/* ───────── 二 · 蛇宴(6) ───────── */
+{cat:"蛇宴",name:"鹤舞云霄(菊花)",seal:"菊",quote:"金菊浮汤,鹤舞云间",
+ svg:SV(`${ST(100,60)}${BOWL("url(#brothG)")}
+ <g transform="translate(120,124)"><g stroke="#E0A93C" stroke-width="2" stroke-linecap="round" fill="none">
+ ${Array.from({length:16}).map((_,i)=>{const a=i*22.5*Math.PI/180;return `<path d="M0 0 q${Math.cos(a)*10} ${Math.sin(a)*10} ${Math.cos(a)*20} ${Math.sin(a)*18}"/>`;}).join("")}</g>
+ <circle r="6" fill="#C8922F"/></g><ellipse cx="120" cy="124" rx="42" ry="9" fill="url(#steamR)"/>${SEAL("菊")}`),
+ quoteFull:"金菊浮汤,鹤舞云间",
+ desc:"蛇羹上桌,撒一把白菊与柠檬叶丝,清香破腥。金黄汤面上花瓣轻浮,如鹤舞云霄——蛇宴最见排场的一幕。",
+ ingredients:["蛇肉","上汤","白菊花","柠檬叶","薄脆"],
+ method:"蛇羹盛碗,临食撒上摘洗过的白菊花瓣与柠檬叶细丝,佐薄脆同食,取其清芬解腻。",
+ culture:"太史蛇羹源出岭南名士府第,撒菊一式既风雅又实用。书中以蛇宴的繁文缛节,写一个时代的讲究与铺张。"},
+
+{cat:"蛇宴",name:"上汤",seal:"汤",quote:"清而不淡,鲜在骨里",
+ svg:SV(`${ST(100,60)}${BOWL("url(#brothG)")}
+ <g fill="#C15F3C">${dot(108,122,2.2)}${dot(132,126,2.2)}</g><g fill="#6B7A56">${dot(120,124,1.8)}${dot(100,126,1.6)}</g>
+ <ellipse cx="120" cy="124" rx="46" ry="10" fill="url(#steamR)"/>${SEAL("汤")}`),
+ quoteFull:"清而不淡,鲜在骨里",
+ desc:"老鸡、火腿、瘦肉久煨吊成的上汤,清澈见底却鲜厚满口。是蛇宴诸味的底子,也是粤厨的看家底气。",
+ ingredients:["老母鸡","金华火腿","瘦肉","清水"],
+ method:"三料汆水后冷水入煲,文火慢吊数小时,撇净浮沫,滤得清汤,鲜味全藏于一碗清澈里。",
+ culture:"「无鸡不成宴」,上汤是粤菜的隐形骨架。书中以一锅吊汤的耐心,写厨道里看不见处的真功夫。"},
+
+{cat:"蛇宴",name:"蛇羹切丝",seal:"丝",quote:"丝丝缕缕,细可穿针",
+ svg:SV(`${ST(100,60)}${BOWL("url(#brothG)")}
+ <g stroke="#C9A86A" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".9">
+ ${Array.from({length:10}).map((_,i)=>{const x=92+i*5.6;return `<path d="M${x} 116 q2 8 0 16"/>`;}).join("")}
+ ${Array.from({length:9}).map((_,i)=>{const x=95+i*5.6;return `<path d="M${x} 122 q-2 6 0 12"/>`;}).join("")}</g>
+ <ellipse cx="120" cy="120" rx="40" ry="8" fill="url(#steamR)"/>${SEAL("丝")}`),
+ quoteFull:"丝丝缕缕,细可穿针",
+ desc:"蛇肉要起骨拆肉、手撕成极细的丝,与冬菇、木耳同烩成羹。讲究的是刀工与耐心,丝细则汤滑。",
+ ingredients:["三蛇肉","冬菇丝","木耳丝","马蹄","生粉"],
+ method:"蛇肉蒸熟拆丝,配诸料丝下上汤煮,勾薄芡成羹,丝幼汤稠方为上品。",
+ culture:"拆蛇取丝是蛇宴最费工的一道关。书中以这份不厌其烦的细致,写旧日厨房里近乎执拗的体面。"},
+
+{cat:"蛇宴",name:"三蛇会",seal:"蛇",quote:"三蛇同煨,味始全",
+ svg:SV(`${PLATE("#EFE0C2")}<g fill="none" stroke="#9B7B4F" stroke-width="3" stroke-linecap="round">
+ <path d="M78 132 q-8 -18 12 -22 q18 -4 14 -16"/><path d="M118 134 q8 -20 -8 -26 q-14 -5 -2 -18"/><path d="M150 130 q12 -16 -6 -24 q-14 -6 0 -16"/></g>
+ <g fill="#7A6650">${dot(104,78,2)}${dot(108,72,2)}${dot(150,76,2)}</g>${SEAL("蛇")}`),
+ quoteFull:"三蛇同煨,味始全",
+ desc:"金脚带、过树榕、饭铲头三蛇同入一煲,各取其性互补。蛇宴的根基,讲究的是配伍而非单味。",
+ ingredients:["金脚带","过树榕","饭铲头","陈皮","姜"],
+ method:"三蛇宰净起肉,配陈皮老姜同煨出底味,再分作羹、丝诸式,所谓「三蛇会」为众味之源。",
+ culture:"岭南食蛇取「以毒攻毒、温补驱风」之说。书中以三蛇会写节令与体性的讲究,是饮食里的一套世界观。"},
+
+{cat:"蛇宴",name:"龙凤会",seal:"凤",quote:"龙缠凤翥,席上珍",
+ svg:SV(`${PLATE("#EFE0C2")}
+ <path d="M84 132 q-10 -20 10 -26 q16 -5 8 -18" fill="none" stroke="#9B7B4F" stroke-width="3" stroke-linecap="round"/>
+ <g transform="translate(146,112)"><path d="M0 18 q-14 -6 -10 -22 q3 -12 14 -10 q-6 8 0 16" fill="url(#goldG)" stroke="#A8762A" stroke-width="1.6"/>
+ <path d="M4 -6 q12 -8 20 -2 q-10 4 -16 10" fill="url(#goldG)" stroke="#A8762A" stroke-width="1.4"/></g>${SEAL("凤")}`),
+ quoteFull:"龙缠凤翥,席上珍",
+ desc:"「龙」为蛇、「凤」为鸡,蛇鸡同烩成一品。取龙凤呈祥之意,是蛇宴里最讨彩头的一道大菜。",
+ ingredients:["蛇肉","鸡肉","冬菇","上汤","火腿"],
+ method:"蛇肉与鸡肉分别处理后同烩,加冬菇火腿提鲜,勾芡装盘,以蛇喻龙、以鸡喻凤。",
+ culture:"龙凤会以食寄意,是粤宴讨口彩的典型。书中借这道吉祥菜,写人情场面里的体面与算计。"},
+
+{cat:"蛇宴",name:"九大簋",seal:"簋",quote:"九簋齐陈,礼之极",
+ svg:SV(`${PLATE("#EFE0C2")}<g>${[[88,108],[120,104],[152,108],[84,124],[120,120],[156,124],[90,140],[120,138],[150,140]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="13" ry="7" fill="url(#brothG)" stroke="#8A7058" stroke-width="1.6"/>`).join("")}</g>${SEAL("簋")}`),
+ quoteFull:"九簋齐陈,礼之极",
+ desc:"九只大簋盛九道菜,是岭南乡间最隆重的盛宴格局。菜式不必精巧,贵在丰盛齐整、合于礼数。",
+ ingredients:["九道荤素","大盆/大簋","乡宴规制"],
+ method:"按主家排场备九道大菜,以大簋分盛,席间次第上桌,讲究菜数成「九」之全。",
+ culture:"「九大簋」是珠三角传统宴席的最高规格,「九」取长久周全之意。书中以它写宗族乡土的隆重与人情厚薄。"},
+
+/* ───────── 三 · 素宴(11) ───────── */
+{cat:"素宴",name:"竹珍宴",seal:"竹",quote:"竹下生珍,清气满席",
+ svg:SV(`${PLATE("#E7EBD6")}<g transform="translate(120,120)">
+ <path d="M-22 16 q-4 -26 6 -34 q6 -4 10 2 q-8 12 -2 32Z" fill="url(#jadeG)" stroke="#6B7A56" stroke-width="1.8"/>
+ <path d="M6 16 q-2 -22 8 -30 q6 -3 8 3 q-6 10 -4 27Z" fill="url(#jadeG)" stroke="#6B7A56" stroke-width="1.8"/>
+ <path d="M-14 -14 l-12 -2 M2 -18 l10 -6" stroke="#6B7A56" stroke-width="1.4" fill="none"/></g>${SEAL("竹")}`),
+ quoteFull:"竹下生珍,清气满席",
+ desc:"以竹笋、竹荪等「竹」字辈山珍为主的一席素菜,取其清鲜爽脆。是寺庵素宴里最见雅意的格局。",
+ ingredients:["竹笋","竹荪","冬菇","上素汤"],
+ method:"鲜笋竹荪汆水去涩,以素上汤煨入味,清炒或煲羹,务求保住一口山林的清气。",
+ culture:"竹在岭南既是食材也是清高的象征。书中以竹珍写斋堂的淡泊——素而不寡,清而有味。"},
+
+{cat:"素宴",name:"五仙果",seal:"五",quote:"五果同盘,寓圆满",
+ svg:SV(`${PLATE("#F2E8D2")}<g>${dot(96,116,11,"#E0A93C")}${dot(120,110,11,"#C15F3C")}${dot(144,116,11,"#9DB87E")}${dot(106,128,11,"#D4836A")}${dot(134,128,11,"#B8893E")}
+ <g fill="none" stroke="#8A6A3A" stroke-width="1.2">${dot(96,116,11)}${dot(120,110,11)}${dot(144,116,11)}${dot(106,128,11)}${dot(134,128,11)}</g></g>${SEAL("五")}`),
+ quoteFull:"五果同盘,寓圆满",
+ desc:"五样时果或果脯同入一盘,色彩缤纷。素宴里清口的一味,既是点缀也是吉祥的五福之喻。",
+ ingredients:["时令五果","蜜渍/鲜拼"],
+ method:"择五色时果洗净修形,或鲜拼或略蜜渍,装盘成五方对称,取「五福」圆满之意。",
+ culture:"以五为数、以果寓福,是斋宴的吉祥语。书中以一盘五果,写素席背后那点不动声色的祈愿。"},
+
+{cat:"素宴",name:"紫竹莲池",seal:"莲",quote:"莲开紫竹,半池清",
+ svg:SV(`${PLATE("#E6EBDA")}
+ <path d="M70 132 q26 8 54 6 q26 -2 46 -6" fill="none" stroke="#9DB87E" stroke-width="2" opacity=".7"/>
+ <ellipse cx="96" cy="126" rx="20" ry="7" fill="#9DB87E" opacity=".55"/>
+ <g transform="translate(132,116)">${Array.from({length:8}).map((_,i)=>{const a=(i*45-90)*Math.PI/180;return `<ellipse cx="${Math.cos(a)*10}" cy="${Math.sin(a)*7}" rx="7" ry="3.4" fill="#E7B8C4" stroke="#C97E92" stroke-width=".8" transform="rotate(${i*45} ${Math.cos(a)*10} ${Math.sin(a)*7})"/>`;}).join("")}<circle r="4" fill="#E0A93C"/></g>
+ <path d="M150 124 q4 -24 -2 -34" stroke="#6E4F7E" stroke-width="2.4" fill="none"/>${SEAL("莲")}`),
+ quoteFull:"莲开紫竹,半池清",
+ desc:"以莲藕、莲子、紫竹配荷叶造境的一道素馔,清雅如一池夏荷。讲究意境多于滋味,是斋菜里的画。",
+ ingredients:["莲藕","莲子","紫竹笋","荷叶"],
+ method:"莲藕莲子煨软,以荷叶垫底造池塘之景,缀以紫竹清炒,重在成景成意。",
+ culture:"莲出淤泥而不染,是佛门与文人共爱的清物。书中以紫竹莲池写斋宴的造境之心——吃的是一份禅意。"},
+
+{cat:"素宴",name:"熔金煮玉",seal:"玉",quote:"金玉同煮,色可餐",
+ svg:SV(`${ST(100,60)}${BOWL("url(#brothG)")}
+ <g>${dot(102,120,6,"#E0A93C")}${dot(132,122,6,"#E0A93C")}${dot(118,128,6,"#E0A93C")}
+ <rect x="108" y="116" width="11" height="11" rx="2" fill="#9DB87E"/><rect x="126" y="124" width="11" height="11" rx="2" fill="#9DB87E"/><rect x="94" y="124" width="10" height="10" rx="2" fill="#9DB87E"/></g>
+ <ellipse cx="120" cy="120" rx="40" ry="8" fill="url(#steamR)"/>${SEAL("玉")}`),
+ quoteFull:"金玉同煮,色可餐",
+ desc:"金者南瓜、玉者冬瓜或豆腐,同煮一羹,金黄碧白相映。名取富贵,味却清淡,是素宴里的巧色之作。",
+ ingredients:["南瓜","冬瓜/豆腐","素上汤","枸杞"],
+ method:"南瓜蒸蓉作金,冬瓜豆腐切玉块,同入素汤煨煮勾薄芡,取金玉满堂之彩。",
+ culture:"以色命名、以名寓福,是斋菜的雅趣。书中借「熔金煮玉」写素席的体面——清贫里也要讨个好意头。"},
+
+{cat:"素宴",name:"梅花脯",seal:"梅",quote:"五瓣成梅,素中雅",
+ svg:SV(`${PLATE("#F2E8D2")}<g>${[[100,114],[140,114],[110,134],[130,134],[120,122]].map(([cx,cy])=>`<g transform="translate(${cx},${cy})">${Array.from({length:5}).map((_,i)=>{const a=(i*72-90)*Math.PI/180;return `<ellipse cx="${Math.cos(a)*6}" cy="${Math.sin(a)*6}" rx="4.6" ry="3" fill="#F0D9C0" stroke="#C8922F" stroke-width=".9" transform="rotate(${i*72} ${Math.cos(a)*6} ${Math.sin(a)*6})"/>`;}).join("")}<circle r="2.4" fill="#C15F3C"/></g>`).join("")}</g>${SEAL("梅")}`),
+ quoteFull:"五瓣成梅,素中雅",
+ desc:"豆制或山药泥模成梅花状的小脯,五瓣分明、淡填胭脂。素宴里见心思的一味,吃的是个雅致。",
+ ingredients:["山药/豆茸","糖","胭脂(天然色)"],
+ method:"山药蒸软研茸调味,以梅花模压形,点染花心,蒸定即成,讲究瓣形清晰。",
+ culture:"梅花是清寒高洁的象征,以食拟梅是文人式的讲究。书中借梅花脯写斋堂里那点不肯将就的雅气。"},
+
+{cat:"素宴",name:"待鹤鸣",seal:"鹤",quote:"虚位待鹤,一席空",
+ svg:SV(`${PLATE("#E9ECDC")}<g transform="translate(120,116)" fill="none" stroke="#8A8A6A" stroke-width="2.2" stroke-linecap="round">
+ <path d="M-2 22 V4 q-2 -14 8 -20 q6 -4 8 2"/><path d="M14 -14 q8 -2 12 2 M14 -14 q6 2 8 6"/><path d="M-2 22 l-8 4 M-2 22 l6 4"/></g>
+ <ellipse cx="120" cy="138" rx="20" ry="5" fill="#9DB87E" opacity=".5"/>${SEAL("鹤")}`),
+ quoteFull:"虚位待鹤,一席空",
+ desc:"以菌菇、面筋仿禽形而成的一道意境素馔,名取「梅妻鹤子」之逸。重在留白与等待,是斋宴的诗。",
+ ingredients:["猴头菇","面筋","素上汤"],
+ method:"猴头菇面筋塑形煨味,以清汤衬之,留一分余地成「待」之境,意在形外。",
+ culture:"「待鹤鸣」化自隐逸典故,是素宴里最重意境的一道。书中以它写斋堂的清寂——一席素菜也是一种心境。"},
+
+{cat:"素宴",name:"素烧鹅",seal:"素",quote:"以豆为皮,假乱真",
+ svg:SV(`${PLATE("#F1E2C6")}<g>
+ <path d="M82 128 l18 -28 l8 24 l16 -26 l8 24 l16 -24 l8 22" fill="none" stroke="#8A5A2A" stroke-width="0"/>
+ ${[[86,118],[108,114],[130,116],[150,120]].map(([x,y],i)=>`<g transform="translate(${x},${y}) rotate(${i*4-6})"><rect x="-12" y="-9" width="24" height="20" rx="3" fill="url(#goldG)" stroke="#8A5A2A" stroke-width="1.8"/><path d="M-12 -3 h24 M-12 3 h24" stroke="#8A5A2A" stroke-width="1" opacity=".6"/></g>`).join("")}</g>${SEAL("素")}`),
+ quoteFull:"以豆为皮,假乱真",
+ desc:"层层腐皮卷紧、卤味后切片煎香,皮脆肉「韧」,形味俱似烧鹅。素仿荤的代表作,见斋厨的巧手。",
+ ingredients:["腐皮","冬菇","酱油","糖","五香"],
+ method:"腐皮逐层刷酱卷紧压实,蒸定后入油煎香、改刀成片,外脆内韧仿烧鹅之态。",
+ culture:"「以素仿荤」是寺院斋菜的传统智慧——戒荤而不弃口腹之趣。书中借素烧鹅写斋堂的圆融与人情味。"},
+
+{cat:"素宴",name:"五花肉(素)",seal:"花",quote:"层层叠叠,素五花",
+ svg:SV(`${PLATE("#F1E2C6")}<g transform="translate(120,120) rotate(-6)">
+ <rect x="-30" y="-16" width="60" height="34" rx="4" fill="#F0E2C8" stroke="#8A5A2A" stroke-width="2"/>
+ <rect x="-30" y="-10" width="60" height="6" fill="#C97E5A"/><rect x="-30" y="2" width="60" height="6" fill="#C97E5A"/><rect x="-30" y="-16" width="60" height="5" fill="#8A5A2A"/></g>${SEAL("花")}`),
+ quoteFull:"层层叠叠,素五花",
+ desc:"以芋泥、腐皮、冬菇叠成肥瘦相间的「五花」纹路,蒸卤入味。形似肉而无肉,是素席炫技的一味。",
+ ingredients:["芋泥","腐皮","冬菇","海苔","酱汁"],
+ method:"芋泥与腐皮、海苔分层叠压做出肥瘦纹理,定形后卤蒸,切块仿五花肉之相。",
+ culture:"做素五花要的是耐心与层次感,极考刀工与火候。书中以这道「以假乱真」写斋厨的较真,也写人对滋味的执念。"},
+
+{cat:"素宴",name:"八宝素鸭",seal:"鸭",quote:"腐衣裹珍,八宝藏",
+ svg:SV(`${PLATE("#F1E2C6")}<g transform="translate(120,118)">
+ <ellipse cx="0" cy="0" rx="40" ry="20" fill="url(#goldG)" stroke="#8A5A2A" stroke-width="2"/>
+ <g>${[[-22,0],[-8,-5],[6,2],[20,-3],[-14,5],[12,-6]].map(([x,y],i)=>dot(x,y,3.2,["#6B7A56","#C15F3C","#8A5A2A","#E0A93C","#9DB87E","#7A4A2A"][i])).join("")}</g>
+ <path d="M-40 0 a40 20 0 0 0 80 0" fill="none" stroke="#8A5A2A" stroke-width="1.2" opacity=".5"/></g>${SEAL("鸭")}`),
+ quoteFull:"腐衣裹珍,八宝藏",
+ desc:"腐皮做衣,裹入莲子、栗子、香菇、糯米等八样馅料,卤后切件。外形如鸭,内藏八宝,丰俭由心。",
+ ingredients:["腐皮","莲子","栗子","香菇","糯米","笋丁"],
+ method:"八样馅料炒香拌匀,以腐皮裹紧成鸭形,蒸卤入味后改件,断面见八宝。",
+ culture:"「八宝」取丰盛圆满之意,素鸭则是斋厨的拿手。书中借八宝素鸭写素席的厚意——简朴外壳里包着满满心意。"},
+
+{cat:"素宴",name:"三宝素会",seal:"宝",quote:"三素同会,各擅长",
+ svg:SV(`${PLATE("#E9ECDC")}<g>
+ <path d="M92 116 q6 -14 16 -10 q8 4 2 14 q-10 6 -18 -4Z" fill="#C9A06A" stroke="#8A5A2A" stroke-width="1.6"/>
+ ${dot(126,116,11,"#9DB87E")}<g fill="none" stroke="#6B7A56" stroke-width="1">${dot(126,116,11)}</g>
+ <ellipse cx="116" cy="132" rx="14" ry="8" fill="url(#riceG)" stroke="#8A7058" stroke-width="1.6"/></g>${SEAL("宝")}`),
+ quoteFull:"三素同会,各擅长",
+ desc:"香菇、面筋、时蔬三样素材同烩一碟,各取其香、其韧、其鲜。素宴里最家常实在的一味会菜。",
+ ingredients:["冬菇","面筋","时蔬","素蚝油"],
+ method:"三料分别处理后同镬快烩,以素蚝油提鲜勾薄芡,讲究三味分明又相融。",
+ culture:"「会」即众材相聚,是粤菜常见的做法。书中以三宝素会写斋堂的实在——不必稀奇,贵在妥帖。"},
+
+{cat:"素宴",name:"鼎湖上素",seal:"鼎",quote:"诸菌共冶,素之冠",
+ svg:SV(`${ST(100,58)}${BOWL("url(#brothG)")}<g>
+ <path d="M96 116 q5 -13 14 -9 q7 4 2 12 q-9 5 -16 -3Z" fill="#C9A06A" stroke="#8A5A2A" stroke-width="1.4"/>
+ ${dot(122,114,7,"#E8DCC0")}<g fill="none" stroke="#9B8A6A" stroke-width="1">${dot(122,114,7)}</g>
+ ${dot(110,126,5,"#9DB87E")}${dot(134,124,5,"#E0A93C")}
+ <path d="M138 118 q6 -4 10 0 q-4 4 -10 2Z" fill="#7A4A2A"/></g>
+ <ellipse cx="120" cy="118" rx="42" ry="9" fill="url(#steamR)"/>${SEAL("鼎")}`),
+ quoteFull:"诸菌共冶,素之冠",
+ desc:"鼎湖庆云寺的名斋,冬菇、草菇、银耳、竹荪、莲子、笋等十余素料同烩一钵。汤鲜料丰,被誉素菜之冠。",
+ ingredients:["冬菇","草菇","银耳","竹荪","莲子","鲜笋","素上汤"],
+ method:"诸菌干货分别泡发汆水,以素上汤分层煨入味再合烩一钵,讲究火候有序、诸味交融。",
+ culture:"鼎湖上素出自岭南古刹,是素斋的集大成者。书中以这道名馔写佛门饮食的隆重——素到极致,亦是一种丰盛。"},
+
+/* ───────── 四 · 其他粤味(7) ───────── */
+{cat:"其他",name:"虾子碌柚皮",seal:"柚",quote:"柚皮吸味,虾子香",
+ svg:SV(`${PLATE("#F1E2C6")}<g>${[[100,116],[124,114],[114,128],[136,126]].map(([x,y],i)=>`<rect x="${x-11}" y="${y-9}" width="22" height="18" rx="3" fill="url(#goldG)" stroke="#8A5A2A" stroke-width="1.8" transform="rotate(${i*5-7} ${x} ${y})"/>`).join("")}
+ <g fill="#C15F3C" opacity=".7">${dot(102,114,1.2)}${dot(124,112,1.2)}${dot(116,126,1.2)}${dot(134,124,1.2)}${dot(110,120,1.2)}${dot(128,120,1.2)}</g></g>${SEAL("柚")}`),
+ quoteFull:"柚皮吸味,虾子香",
+ desc:"柚子皮反复浸煮去苦,煨入浓汤再撒虾子。本身无味,却最善吸味,一口尽是上汤的厚与虾子的鲜。",
+ ingredients:["柚子皮","虾子","上汤","蚝油","姜葱"],
+ method:"柚皮去囊反复浸漂去苦,挤干后以上汤虾子慢火煨透,收汁撒虾子上桌。",
+ culture:"化「废皮」为珍味,是粤厨惜物与点石成金的本事。书中借碌柚皮写厨道——至味往往出于最不起眼处。"},
+
+{cat:"其他",name:"鰽白咸鱼",seal:"咸",quote:"一脔咸鱼,送三碗",
+ svg:SV(`${PLATE("#F1E2C6")}<g transform="translate(120,120)">
+ <path d="M-44 0 q20 -18 44 -16 q22 2 40 16 q-18 14 -40 16 q-24 2 -44 -16Z" fill="url(#fishG)" stroke="#7A8A8A" stroke-width="2"/>
+ <path d="M40 0 l16 -10 v20Z" fill="#BCCFD1" stroke="#7A8A8A" stroke-width="1.6"/>
+ <circle cx="-28" cy="-2" r="2.4" fill="#3A2E26"/><path d="M-10 -10 q10 -4 24 0 M-10 10 q10 4 24 0" stroke="#7A8A8A" stroke-width="1" fill="none"/>
+ <g fill="#fff" opacity=".8">${dot(-6,-4,1)}${dot(8,2,1)}${dot(-2,6,1)}${dot(18,-2,1)}</g></g>${SEAL("咸")}`),
+ quoteFull:"一脔咸鱼,送三碗",
+ desc:"鰽白腌成咸鱼,蒸时浇油、铺姜丝。咸香浓烈,一小块就能下三碗白饭,是岭南最市井的「送饭神器」。",
+ ingredients:["鰽白咸鱼","姜丝","花生油","葱"],
+ method:"咸鱼洗净铺姜丝,淋油清蒸至骨肉松化,出锅撒葱,咸鲜尽出。",
+ culture:"咸鱼是穷年月里的智慧,也是挥不去的乡味。书中以一脔咸鱼写漂泊人的根——再走多远,口味认得家。"},
+
+{cat:"其他",name:"蔗渣鱼",seal:"蔗",quote:"蔗香入骨,鱼自鲜",
+ svg:SV(`${PLATE("#EDEAD6")}<g transform="translate(118,118)">
+ <path d="M-42 0 q20 -16 42 -14 q22 2 38 14 q-16 13 -38 14 q-22 2 -42 -14Z" fill="url(#fishG)" stroke="#7A8A8A" stroke-width="2"/>
+ <path d="M38 0 l15 -9 v18Z" fill="#BCCFD1" stroke="#7A8A8A" stroke-width="1.6"/><circle cx="-26" cy="-1" r="2.2" fill="#3A2E26"/></g>
+ <g stroke="#9DB87E" stroke-width="3" stroke-linecap="round"><path d="M86 138 l20 -4"/><path d="M132 138 l22 -4"/></g>${SEAL("蔗")}`),
+ quoteFull:"蔗香入骨,鱼自鲜",
+ desc:"以甘蔗垫底或同蒸,蔗的清甜渗入鱼肉,去腥添香。是岭南就地取材、巧用物产的乡野智慧。",
+ ingredients:["鲜鱼","甘蔗","姜葱","豉油"],
+ method:"甘蔗剖条垫底,鱼置其上清蒸,蔗汁受热渗入鱼肉,起锅淋豉油热油。",
+ culture:"蔗田遍布的岭南,连甘蔗也入得了灶。书中借蔗渣鱼写一方水土养一方味——风物即是滋味的来处。"},
+
+{cat:"其他",name:"四季仔",seal:"季",quote:"四时一蔬,常青翠",
+ svg:SV(`${PLATE("#E7EBD6")}<g>${[[100,118,-12],[114,114,4],[128,118,-6],[140,122,10]].map(([x,y,r])=>`<g transform="translate(${x},${y}) rotate(${r})"><path d="M0 -16 q9 8 0 30 q-9 -22 0 -30Z" fill="url(#jadeG)" stroke="#6B7A56" stroke-width="1.6"/><path d="M0 -12 v24" stroke="#6B7A56" stroke-width="1" opacity=".6"/></g>`).join("")}</g>${SEAL("季")}`),
+ quoteFull:"四时一蔬,常青翠",
+ desc:"小巧的时令青蔬,清炒或白灼,取其鲜嫩翠绿。是粤人「不时不食」的体现,一碟清简见本味。",
+ ingredients:["时令青蔬","蒜","盐","油"],
+ method:"青蔬择嫩,旺火快炒或滚水白灼,落少许油盐保住翠色与脆嫩。",
+ culture:"「不时不食」是粤人对节令的敬意。书中以一碟四季仔写日常的清淡——最好的味道,常是顺天时的本味。"},
+
+{cat:"其他",name:"生菜包蚬肉",seal:"包",quote:"翠叶裹鲜,一口收",
+ svg:SV(`${PLATE("#E7EBD6")}<g transform="translate(120,118)">
+ <path d="M-34 6 q-6 -28 34 -30 q40 2 34 30 q-34 14 -68 0Z" fill="url(#jadeG)" stroke="#6B7A56" stroke-width="2"/>
+ <path d="M-34 6 q34 -14 68 0" fill="none" stroke="#6B7A56" stroke-width="1" opacity=".6"/>
+ <g fill="#C9A06A" stroke="#8A5A2A" stroke-width=".8">${dot(-10,-4,3.4)}${dot(6,-2,3.4)}${dot(-2,2,3.4)}${dot(16,-4,3.2)}${dot(-18,0,3)}</g></g>${SEAL("包")}`),
+ quoteFull:"翠叶裹鲜,一口收",
+ desc:"脆嫩生菜作碗,盛入炒香的蚬肉碎,自己动手一包入口。脆与鲜、生与熟在一口里撞出趣味。",
+ ingredients:["生菜","蚬肉","马蹄","榄仁","XO酱"],
+ method:"蚬肉配马蹄榄仁炒香,盛于洗净的生菜叶中,食时自包成卷,讲究一脆一鲜。",
+ culture:"生菜谐音「生财」,包食的仪式感也添喜气。书中以这道边玩边吃的菜,写岭南饭桌的热闹人情。"},
+
+{cat:"其他",name:"礼云子",seal:"礼",quote:"礼云礼云,玉帛乎",
+ svg:SV(`${PLATE("#F1E2C6")}<g transform="translate(120,118)">
+ <ellipse cx="0" cy="0" rx="30" ry="16" fill="#F6EDD8" stroke="#C9B79A" stroke-width="1.4"/>
+ <g fill="#C15F3C">${Array.from({length:26}).map(()=>{const x=(Math.random()*2-1)*24;const y=(Math.random()*2-1)*11;return dot(x.toFixed(1),y.toFixed(1),1.6,"#C15F3C");}).join("")}</g>
+ <g fill="#E0A93C">${dot(-8,-3,1.4)}${dot(10,4,1.4)}${dot(2,-5,1.4)}</g></g>${SEAL("礼")}`),
+ quoteFull:"礼云礼云,玉帛乎",
+ desc:"蟛蜞(小蟹)之膏,粒粒如赤金,极珍极鲜。得名自《论语》「礼云礼云」之叹,是粤味里最文气的一笔。",
+ ingredients:["蟛蜞膏(礼云子)","鸡蛋","蛋白","葱"],
+ method:"礼云子极易腥败,需鲜取速烹；多与蛋同蒸或滑炒,以其本鲜为主,不夺其味。",
+ culture:"「礼云子」之名取自《论语》「礼云礼云,玉帛云乎哉」,以经书入菜名是岭南食文化的雅趣。书中以它写饮食里的书卷气。"},
+
+{cat:"其他",name:"田间宴",seal:"田",quote:"就地起灶,田头香",
+ svg:SV(`${PLATE("#E9ECDC")}<g>
+ <path d="M94 124 q-2 -18 8 -18 q10 0 8 18Z" fill="#E07A4A" stroke="#A8542A" stroke-width="1.4"/>
+ <path d="M104 124 q-2 -16 7 -16 q9 0 7 16Z" fill="#E0A93C" stroke="#A8762A" stroke-width="1.4"/>
+ ${dot(126,116,10,"#9DB87E")}<g fill="none" stroke="#6B7A56" stroke-width="1">${dot(126,116,10)}</g>
+ <path d="M138 126 q9 8 0 -16 q-9 24 0 16Z" fill="url(#jadeG)" stroke="#6B7A56" stroke-width="1.4"/></g>${SEAL("田")}`),
+ quoteFull:"就地起灶,田头香",
+ desc:"田间地头就地取材、起灶而食的乡野之宴。瓜豆鱼鲜不拘一格,吃的是新鲜与天地间的痛快。",
+ ingredients:["时令瓜菜","河鲜","柴火土灶"],
+ method:"取田头最新鲜的瓜菜河鲜,就地柴火烹煮,粗朴而本味十足,贵在一个「鲜」字。",
+ culture:"田间宴是农耕岁月里的犒赏,也是人与土地最近的一餐。书中以它写质朴的丰足——好味不必登堂入室。"},
+
+/* ───────── 五 · 本帮苏浙(10) ───────── */
+{cat:"本帮",name:"八宝辣酱",seal:"宝",quote:"八味一镬,浓油赤",
+ svg:SV(`${PLATE("#F0E0C4")}<g transform="translate(120,118)">
+ <ellipse cx="0" cy="0" rx="34" ry="18" fill="url(#redG)" stroke="#9A3F1E" stroke-width="1.6"/>
+ ${[[-18,-4,"#E8DCC0"],[-4,3,"#9DB87E"],[10,-3,"#C9A06A"],[20,4,"#6B7A56"],[2,-6,"#E0A93C"],[-12,5,"#C15F3C"],[14,6,"#8A5A2A"]].map(([x,y,c])=>dot(x,y,3,c)).join("")}
+ <g fill="#C15F3C">${dot(-24,2,1.4)}${dot(24,-2,1.4)}</g></g>${SEAL("宝")}`),
+ quoteFull:"八味一镬,浓油赤",
+ desc:"鸡丁、肉丁、笋丁、花生、虾仁等八样配辣酱同炒,浓油赤酱、咸鲜微辣。是本帮下饭的经典杂烩。",
+ ingredients:["猪肉丁","鸡丁","笋丁","花生","虾仁","辣酱"],
+ method:"八料分别上浆滑油,再下辣豆瓣同炒收汁,讲究丁子大小均一、酱色红亮。",
+ culture:"八宝辣酱是上海本帮「浓油赤酱」的代表。书中以它写十八行的上海底色——与粤味的清淡两相对照。"},
+
+{cat:"本帮",name:"青鱼汤卷",seal:"卷",quote:"鱼肉成卷,浮清汤",
+ svg:SV(`${ST(100,60)}${BOWL("url(#brothG)")}<g>
+ <g transform="translate(106,120)"><ellipse rx="13" ry="9" fill="url(#fishG)" stroke="#7A8A8A" stroke-width="1.6"/><ellipse rx="6" ry="4" fill="none" stroke="#9DB87E" stroke-width="1.4"/></g>
+ <g transform="translate(134,124)"><ellipse rx="12" ry="8" fill="url(#fishG)" stroke="#7A8A8A" stroke-width="1.6"/><ellipse rx="5" ry="3.4" fill="none" stroke="#9DB87E" stroke-width="1.4"/></g></g>
+ <ellipse cx="120" cy="120" rx="40" ry="8" fill="url(#steamR)"/>${SEAL("卷")}`),
+ quoteFull:"鱼肉成卷,浮清汤",
+ desc:"青鱼肉批薄裹馅卷成筒,氽汤而食。鱼肉滑嫩、汤色清亮,是江浙人家细致刀工的一道功夫菜。",
+ ingredients:["青鱼","笋","火腿","蛋清","高汤"],
+ method:"青鱼批薄片,卷入笋丝火腿成卷,入高汤汆熟,讲究卷紧不散、汤清味鲜。",
+ culture:"江南食鱼讲究刀工与清鲜,与粤式的镬气不同路数。书中以这道汤卷写本帮的细腻——一城一味,各有讲究。"},
+
+{cat:"本帮",name:"鱼圆",seal:"圆",quote:"洁白如玉,落汤浮",
+ svg:SV(`${ST(100,60)}${BOWL("url(#brothG)")}<g fill="#FBF6EC" stroke="#D8C9A8" stroke-width="1">
+ ${dot(104,120,8)}${dot(124,118,9)}${dot(138,124,7)}${dot(114,126,7)}</g>
+ <g fill="#6B7A56">${dot(130,122,1.4)}${dot(108,124,1.4)}</g>
+ <ellipse cx="120" cy="118" rx="40" ry="8" fill="url(#steamR)"/>${SEAL("圆")}`),
+ quoteFull:"洁白如玉,落汤浮",
+ desc:"鱼茸顺一个方向搅打上劲,挤成丸子下温水养熟,洁白浮汤、入口弹嫩。是江浙最考手劲的一味。",
+ ingredients:["青鱼/鲢鱼茸","蛋清","葱姜水","盐"],
+ method:"鱼茸加葱姜水盐顺向搅打至上劲发亮,虎口挤圆入温水养熟,讲究嫩滑而不散。",
+ culture:"鱼圆好不好,全在搅打的劲与方向,极考耐心。书中以它写本帮厨房的细功——清白一颗,藏着千百次手起。"},
+
+{cat:"本帮",name:"卤水",seal:"卤",quote:"老卤一锅,愈陈香",
+ svg:SV(`${PLATE("#E6D8BE")}<g>
+ ${dot(102,118,9,"#5C3A22")}${dot(124,114,8,"#6B4327")}${dot(140,120,8,"#4A2C16")}${dot(116,128,9,"#6B4327")}
+ <g fill="none" stroke="#3A2212" stroke-width="1">${dot(102,118,9)}${dot(124,114,8)}${dot(140,120,8)}${dot(116,128,9)}</g>
+ <g fill="#fff" opacity=".25">${dot(99,115,2.4)}${dot(121,111,2.2)}${dot(113,125,2.4)}</g></g>${SEAL("卤")}`),
+ quoteFull:"老卤一锅,愈陈香",
+ desc:"以老卤汁慢浸豆腐干、鸡蛋、肉类等,色泽酱红、咸香入骨。卤水愈老愈香,是时间熬出的味道。",
+ ingredients:["老卤","八角桂皮","酱油","冰糖","各式荤素料"],
+ method:"诸料汆水后入老卤文火浸煮,关火续浸入味,卤汁滤净留存,反复使用愈陈愈醇。",
+ culture:"一锅老卤往往传用多年,是人家的「传家味」。书中以老卤写时间与记忆——味道里封存着说不尽的旧事。"},
+
+{cat:"本帮",name:"兰花豆腐干",seal:"兰",quote:"刀走如兰,干成花",
+ svg:SV(`${PLATE("#F0E5CE")}<g transform="translate(120,118) rotate(-8)">
+ <rect x="-24" y="-14" width="48" height="28" rx="3" fill="#E9C77E" stroke="#A8762A" stroke-width="2"/>
+ <g stroke="#A8762A" stroke-width="1.1" opacity=".7"><path d="M-24 -8 h48 M-24 -2 h48 M-24 4 h48 M-24 10 h48"/><path d="M-16 -14 v28 M-6 -14 v28 M4 -14 v28 M14 -14 v28" opacity=".5"/></g></g>${SEAL("兰")}`),
+ quoteFull:"刀走如兰,干成花",
+ desc:"豆腐干交错细切而不断,一拉即如兰花绽开。卤味后凉拌,既是刀工炫技,也是下酒的清雅小食。",
+ ingredients:["白豆腐干","卤汁","麻油","葱"],
+ method:"豆干两面交错斜切至近断不断,以卤汁浸味,提起自然舒展成花,淋麻油凉拌。",
+ culture:"兰花干是淮扬刀工的入门考题,讲究的是手稳与心细。书中以它写江南厨道的雅致——一块豆干也要做出风骨。"},
+
+{cat:"本帮",name:"糟卤",seal:"糟",quote:"酒糟封鲜,凉透香",
+ svg:SV(`${PLATE("#EFE6D0")}<g>
+ <path d="M96 124 q-4 -16 8 -22 q14 6 14 22 q-12 6 -22 0Z" fill="url(#shrimpG)" stroke="#A8542A" stroke-width="1.6"/>
+ <g fill="#9DB87E" stroke="#6B7A56" stroke-width=".8">${dot(126,116,4)}${dot(138,122,4)}${dot(130,128,4)}${dot(146,116,3.6)}</g>
+ <g fill="#F6EDD8" opacity=".4">${dot(110,118,18)}</g></g>${SEAL("糟")}`),
+ quoteFull:"酒糟封鲜,凉透香",
+ desc:"以香糟卤浸渍虾、毛豆、门腔等,带酒香的咸鲜、清凉爽口。是江南夏日餐桌上最开胃的一味冷食。",
+ ingredients:["香糟卤","河虾","毛豆","花椒"],
+ method:"食材汆熟晾凉,浸入调好的糟卤冷藏入味,讲究糟香透而不冲、凉而不腥。",
+ culture:"「糟」是江南用酒糟保存与增香的古法。书中以糟味写苏浙人家的时令讲究——夏有夏的清,冬有冬的暖。"},
+
+{cat:"本帮",name:"红烧肉",seal:"红",quote:"浓油赤酱,入口融",
+ svg:SV(`${PLATE("#F0E0C4")}<g>${[[100,116,5],[124,114,7],[114,128,8],[136,124,6]].map(([x,y,s])=>`<g transform="translate(${x},${y})"><rect x="-9" y="-9" width="18" height="18" rx="4" fill="url(#meatG)" stroke="#3A2212" stroke-width="1.4"/><rect x="-9" y="-9" width="18" height="5" rx="2" fill="#C97E5A" opacity=".8"/><ellipse cx="-3" cy="-4" rx="2.4" ry="1.4" fill="#fff" opacity=".5"/></g>`).join("")}
+ <path d="M88 138 q32 8 64 0" stroke="#6B4327" stroke-width="2.5" fill="none" opacity=".4" stroke-linecap="round"/></g>${SEAL("红")}`),
+ quoteFull:"浓油赤酱,入口融",
+ desc:"五花肉切方块,冰糖炒色、文火慢煨至酱红油亮。肥而不腻、入口即化,是本帮家常的看家菜。",
+ ingredients:["五花肉","冰糖","老抽","料酒","姜葱"],
+ method:"肉块焯水,冰糖炒糖色裹肉,加酱油料酒文火慢煨至酥糯,大火收汁油亮。",
+ culture:"红烧肉是本帮「浓油赤酱」的灵魂,一家一味。书中以它写上海家常的暖——再大的城,也落到一碗肉的踏实里。"},
+
+{cat:"本帮",name:"响油鳝糊",seal:"鳝",quote:"热油一浇,滋啦响",
+ svg:SV(`${PLATE("#EFDFC2")}<g transform="translate(118,118)">
+ <ellipse rx="34" ry="17" fill="url(#darkG)" stroke="#2E1A10" stroke-width="1.4"/>
+ <g stroke="#1E120A" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"><path d="M-22 -4 q10 6 22 0"/><path d="M-14 4 q12 -5 24 1"/><path d="M-2 -7 q10 4 18 -1"/></g>
+ <circle cx="0" cy="0" r="5" fill="#E0A93C"/><circle cx="0" cy="0" r="5" fill="none" stroke="#A8762A" stroke-width="1"/>
+ <g fill="#9DB87E">${dot(-10,-8,1.4)}${dot(8,8,1.4)}${dot(16,-6,1.4)}</g></g>
+ <path d="M120 88 q-3 -10 3 -16" stroke="#B8893E" stroke-width="1.3" fill="none" opacity=".4"/>${SEAL("鳝")}`),
+ quoteFull:"热油一浇,滋啦响",
+ desc:"鳝丝炒糊,中间留一窝撒葱蒜,临上桌浇一勺滚油「滋啦」作响、葱香四溢。是江浙最有声色的一味。",
+ ingredients:["鳝丝","蒜末","葱","胡椒","麻油","热油"],
+ method:"鳝丝爆炒勾芡成糊装盘,中央堆葱蒜末,临食浇滚油激香,故名「响油」。",
+ culture:"「响油」一式把听觉也请上桌,是江南菜的戏剧感。书中以这滋啦一响,写本帮饭桌的烟火热闹。"},
+
+{cat:"本帮",name:"醉蟹",seal:"醉",quote:"花雕封蟹,生取鲜",
+ svg:SV(`${PLATE("#EEE3CB")}<g transform="translate(120,118)">
+ <ellipse rx="20" ry="15" fill="#D88A4A" stroke="#A8542A" stroke-width="1.8"/>
+ <g stroke="#A8542A" stroke-width="2" fill="none" stroke-linecap="round"><path d="M-20 -4 q-12 -2 -16 -10"/><path d="M-20 4 q-12 4 -14 12"/><path d="M20 -4 q12 -2 16 -10"/><path d="M20 4 q12 4 14 12"/><path d="M-12 -14 q-2 -8 -8 -10"/><path d="M12 -14 q2 -8 8 -10"/></g>
+ <g fill="#A8542A">${dot(-7,-3,1.6)}${dot(7,-3,1.6)}</g>
+ <g fill="#E0A93C" opacity=".7">${dot(0,2,3)}</g>
+ <ellipse rx="30" ry="22" fill="#E0A93C" opacity=".15"/></g>${SEAL("醉")}`),
+ quoteFull:"花雕封蟹,生取鲜",
+ desc:"活蟹以花雕、酱油、香料生浸数日,蟹膏凝如琥珀、酒香沁骨。是江浙人偏爱的一味「生鲜」冷食。",
+ ingredients:["活湖蟹","花雕酒","酱油","姜","香料"],
+ method:"鲜蟹洗净,以花雕酱料封浸冷藏数日入味,生食取其膏凝肉嫩、酒香透骨。",
+ culture:"醉食是江南对鲜与酒的极致追求,讲究时令与火候之外的「不烹之烹」。书中以醉蟹写苏浙饮食的精致与冒险。"},
+
+{cat:"本帮",name:"腌笃鲜",seal:"鲜",quote:"咸鲜同笃,汤色乳",
+ svg:SV(`${ST(100,58)}${BOWL("url(#riceG)")}<g>
+ <path d="M98 116 q3 -16 10 -16 q7 0 4 16Z" fill="#F0E2C8" stroke="#C9A86A" stroke-width="1.4"/>
+ <path d="M126 114 q3 -14 9 -14 q6 0 4 14Z" fill="#E7B8A0" stroke="#C97E5A" stroke-width="1.4"/>
+ ${dot(116,126,5,"#F6EDD8")}${dot(140,124,5,"#E7B8A0")}
+ <path d="M108 128 q9 6 0 -14 q-9 20 0 14Z" fill="url(#jadeG)" stroke="#6B7A56" stroke-width="1.2"/></g>
+ <ellipse cx="120" cy="118" rx="42" ry="9" fill="url(#steamR)"/>${SEAL("鲜")}`),
+ quoteFull:"咸鲜同笃,汤色乳",
+ desc:"咸肉、鲜肉与春笋同「笃」(慢炖),咸鲜交融、汤白如乳。是江南开春最家常也最妥帖的一锅。",
+ ingredients:["咸肉","鲜五花","春笋","百叶结"],
+ method:"咸鲜两肉与春笋冷水同煲,文火慢笃至汤色奶白、笋香渗汤,不必多调,本味自足。",
+ culture:"「笃」是上海话里的慢炖,腌笃鲜把时间炖进汤里。书中以这一锅咸鲜,写本帮人家春日里的安稳与团圆。"}
+];
+
+/* ============ 渲染 ============ */
+const grid=document.getElementById("grid");
+const countEl=document.getElementById("count");
+DISHES.forEach((d,i)=>d._i=i);
+
+function render(cat){
+  grid.innerHTML="";
+  const list=DISHES.filter(d=>cat==="all"||d.cat===cat);
+  list.forEach(d=>{
+    const el=document.createElement("div");
+    el.className="dish";
+    el.innerHTML=`<div class="illus">${d.svg}</div>
+      <div class="meta"><div class="cat">${d.cat}</div><div class="dn">${d.name}</div>
+      <div class="q">${d.quote}</div></div>`;
+    el.addEventListener("click",()=>openCard(d._i));
+    grid.appendChild(el);
+  });
+  countEl.textContent=`共 ${list.length} 道`;
+}
+document.getElementById("tabs").addEventListener("click",e=>{
+  const t=e.target.closest(".tab");if(!t)return;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  render(t.dataset.cat);
+});
+
+/* ============ Modal ============ */
+const overlay=document.getElementById("overlay"),card=document.getElementById("card");
+function openCard(i){
+  const d=DISHES[i];if(!d)return;
+  card.innerHTML=`
+    <div class="chero">${d.svg}<button class="close" aria-label="关闭">×</button></div>
+    <div class="cbody">
+      <div class="ccat">${d.cat}</div>
+      <div class="ctitle">${d.name}</div>
+      <p class="quote">“${d.quoteFull||d.quote}”</p>
+      <div class="sect"><p class="sh">书中描述</p><p>${d.desc}</p></div>
+      <div class="sect"><p class="sh">主要食材</p><div class="tags">${d.ingredients.map(x=>`<span>${x}</span>`).join("")}</div></div>
+      <div class="sect"><p class="sh">烹制要点</p><p>${d.method}</p></div>
+      <div class="sect"><p class="sh">文化背景</p><p>${d.culture}</p></div>
+    </div>`;
+  card.querySelector(".close").addEventListener("click",closeCard);
+  overlay.classList.add("show");
+  overlay.scrollTop=0;card.scrollTop=0;
+}
+function closeCard(){overlay.classList.remove("show");}
+overlay.addEventListener("click",e=>{if(e.target===overlay)closeCard();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard();});
+
+render("all");
+</script>
+</body>
+</html>

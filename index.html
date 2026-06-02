@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>燕食记 · 一部岭南饮食的长卷</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4ECE0;--paper-2:#EDE3D4;--ink:#3A2E26;--ink-soft:#6B5B4F;
+    --line-soft:#D8C9B4;--gold:#B8893E;--rust:#C15F3C;--green:#6B7A56;--crimson:#7A2A1A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:"Noto Serif SC",serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.8;}
+
+  /* ── 顶部导航(首屏隐藏,滚动后渐入) ── */
+  .nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;
+    background:rgba(244,236,224,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line-soft);
+    transform:translateY(-100%);opacity:0;transition:transform .4s ease,opacity .4s ease;
+  }
+  .nav.show{transform:translateY(0);opacity:1;}
+  .nav .brand{font-family:"ZCOOL XiaoWei",serif;font-size:22px;letter-spacing:.12em;}
+  .nav .brand small{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.18em;margin-left:10px;text-transform:uppercase;}
+  .nav ul{display:flex;gap:6px;list-style:none;margin:0;padding:0;}
+  .nav a{text-decoration:none;color:var(--ink-soft);padding:6px 16px;border-radius:20px;font-size:15px;transition:.2s;}
+  .nav a:hover{color:var(--ink);background:var(--paper-2);}
+  .nav a.active{color:#fff;background:var(--rust);}
+
+  /* ── 首屏 ── */
+  .hero{position:relative;height:100vh;min-height:560px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  .hero .layer{position:absolute;inset:0;pointer-events:none;}
+
+  /* 底层:广彩回纹极缓平移 */
+  .hero .bg-pattern{z-index:0;opacity:.12;animation:drift 90s linear infinite;}
+  @keyframes drift{from{background-position:0 0;}to{background-position:280px 280px;}}
+
+  /* 中层:满洲窗彩光呼吸 */
+  .hero .bg-glow{z-index:1;}
+  .hero .bg-glow .win{position:absolute;width:340px;height:340px;opacity:.16;animation:breathe 8s ease-in-out infinite;}
+  .hero .bg-glow .win.tl{top:-70px;left:-60px;}
+  .hero .bg-glow .win.br{bottom:-80px;right:-60px;animation-delay:4s;}
+  @keyframes breathe{0%,100%{opacity:.1;}50%{opacity:.26;}}
+
+  /* 前层:蒸笼 + 热气 */
+  .hero .steamers{z-index:2;}
+  .hero .steamer{position:absolute;bottom:-10px;}
+  .hero .steamer.s1{left:8%;}
+  .hero .steamer.s2{left:50%;transform:translateX(-50%) scale(1.15);}
+  .hero .steamer.s3{right:8%;}
+  .steam{transform-origin:bottom center;}
+  .steam path{stroke:#B8893E;stroke-width:2.4;fill:none;stroke-linecap:round;opacity:0;
+    animation:rise 5.5s ease-in-out infinite;}
+  .steam path:nth-child(2){animation-delay:1.1s;}
+  .steam path:nth-child(3){animation-delay:2.4s;}
+  .s2 .steam path{animation-duration:6.2s;}
+  .s3 .steam path{animation-delay:.7s;animation-duration:5s;}
+  @keyframes rise{
+    0%{opacity:0;transform:translateY(14px) scaleY(.7);}
+    25%{opacity:.5;}
+    70%{opacity:.32;}
+    100%{opacity:0;transform:translateY(-46px) scaleY(1.25);}
+  }
+
+  /* 渐隐过渡到纸色,衔接下方内容 */
+  .hero .fade-bottom{position:absolute;left:0;right:0;bottom:0;height:160px;z-index:3;
+    background:linear-gradient(to bottom,rgba(244,236,224,0),var(--paper));pointer-events:none;}
+
+  /* 主体文字 */
+  .hero .center{position:relative;z-index:4;text-align:center;padding:0 20px;}
+  .hero .title{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(64px,13vw,140px);letter-spacing:.16em;
+    color:var(--ink);margin:0;line-height:1.05;
+    text-shadow:0 6px 30px rgba(58,46,38,.12);
+    opacity:0;transform:translateY(22px);animation:fadeUp 1.4s cubic-bezier(.2,.8,.2,1) .3s forwards;}
+  .hero .sub{font-size:clamp(15px,2.2vw,20px);color:var(--ink-soft);letter-spacing:.28em;margin:18px 0 6px;
+    opacity:0;transform:translateY(18px);animation:fadeUp 1.4s cubic-bezier(.2,.8,.2,1) .8s forwards;}
+  .hero .sub2{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--gold);letter-spacing:.4em;text-transform:uppercase;
+    opacity:0;transform:translateY(18px);animation:fadeUp 1.4s cubic-bezier(.2,.8,.2,1) 1.1s forwards;}
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+
+  /* 滚动提示 */
+  .hero .scroll-hint{position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:4;
+    font-size:13px;color:var(--ink-soft);text-align:center;letter-spacing:.12em;
+    opacity:0;animation:fadeUp 1s ease 1.8s forwards;}
+  .hero .scroll-hint .arrow{display:block;font-size:20px;margin-top:6px;animation:bob 2s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
+
+  /* ── 通用区段 ── */
+  section.block{max-width:920px;margin:0 auto;padding:64px 28px;}
+  .block .kicker{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.24em;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:10px;}
+  .block h2{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(26px,4vw,38px);letter-spacing:.1em;text-align:center;margin:0 0 26px;font-weight:400;}
+  .block .lead{font-size:16.5px;color:var(--ink);max-width:680px;margin:0 auto;text-align:justify;}
+  .divider{width:54px;height:2px;background:var(--gold);opacity:.5;margin:0 auto 26px;border-radius:2px;}
+
+  /* 关于此书:封面 + 文字并排 */
+  .about-wrap{display:flex;gap:40px;align-items:center;justify-content:center;flex-wrap:wrap;}
+  .book-cover{margin:0;flex:none;width:250px;}
+  .book-cover img{display:block;width:100%;height:auto;border-radius:4px;
+    box-shadow:0 24px 48px -22px rgba(58,46,38,.5),0 6px 16px -8px rgba(58,46,38,.3);
+    border:1px solid rgba(184,137,62,.22);}
+  .book-cover figcaption{margin-top:12px;text-align:center;font-size:12px;color:var(--ink-soft);font-family:"JetBrains Mono",monospace;letter-spacing:.08em;}
+  .about-wrap .lead{flex:1;min-width:280px;margin:0;}
+
+  /* 关于作者 */
+  .author-card{display:flex;gap:26px;align-items:flex-start;justify-content:center;flex-wrap:wrap;max-width:740px;margin:0 auto;}
+  .author-badge{width:74px;height:74px;border-radius:50%;flex:none;background:var(--rust);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:"ZCOOL XiaoWei",serif;font-size:38px;
+    border:2px solid rgba(255,255,255,.6);box-shadow:0 8px 22px -8px rgba(58,46,38,.6);}
+  .author-card .atext{flex:1;min-width:280px;}
+  .author-card .aname{font-family:"ZCOOL XiaoWei",serif;font-size:21px;letter-spacing:.06em;margin-bottom:10px;}
+  .author-card .aname small{font-size:12.5px;color:var(--ink-soft);font-family:"Noto Serif SC",serif;margin-left:10px;letter-spacing:0;}
+  .author-card .atext p{margin:0;font-size:15.5px;color:var(--ink);text-align:justify;}
+
+  /* 两代厨人 */
+  .chefs{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin-top:8px;}
+  .chef{width:230px;text-align:center;padding:0 8px;}
+  .chef .badge{width:74px;height:74px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;
+    font-family:"ZCOOL XiaoWei",serif;font-size:34px;color:#fff;border:2px solid rgba(255,255,255,.6);box-shadow:0 8px 22px -8px rgba(58,46,38,.6);}
+  .chef .nm{font-family:"ZCOOL XiaoWei",serif;font-size:22px;letter-spacing:.06em;}
+  .chef .role{font-size:12.5px;color:var(--gold);margin:2px 0 8px;}
+  .chef .line{font-size:14px;color:var(--ink-soft);}
+  .chef-link{position:relative;width:120px;height:40px;flex:none;}
+  .chef-link svg{width:100%;height:100%;overflow:visible;}
+  .chef-link .lbl{position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--gold);background:var(--paper);padding:0 6px;}
+
+  /* 三地流转 */
+  .places{position:relative;display:flex;align-items:flex-start;justify-content:space-between;max-width:640px;margin:20px auto 0;}
+  .places::before{content:"";position:absolute;top:26px;left:8%;right:8%;height:2px;background:var(--gold);opacity:.45;}
+  .place{position:relative;text-align:center;width:33%;}
+  .place .node{width:54px;height:54px;border-radius:50%;margin:0 auto 12px;background:var(--paper);border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;font-family:"ZCOOL XiaoWei",serif;font-size:22px;color:var(--rust);position:relative;z-index:1;}
+  .place .pn{font-size:16px;font-weight:600;}
+  .place .pd{font-size:13px;color:var(--ink-soft);margin-top:4px;}
+
+  /* 入口卡 */
+  .gates{max-width:920px;margin:10px auto 0;padding:30px 28px 0;display:grid;gap:24px;grid-template-columns:1fr 1fr;}
+  .gate{position:relative;display:block;text-decoration:none;color:inherit;border:1px solid var(--line-soft);border-radius:18px;overflow:hidden;
+    background:var(--paper);box-shadow:0 10px 30px -22px rgba(58,46,38,.6);transition:.28s;}
+  .gate:hover{transform:translateY(-5px);border-color:var(--gold);box-shadow:0 20px 40px -20px rgba(58,46,38,.55);}
+  .gate .thumb{height:150px;background:linear-gradient(160deg,#F7F0E4,#EBDFCC);display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line-soft);}
+  .gate .thumb svg{height:120px;width:auto;}
+  .gate .gmeta{padding:18px 22px 22px;}
+  .gate .gt{font-family:"ZCOOL XiaoWei",serif;font-size:24px;letter-spacing:.06em;}
+  .gate .gd{font-size:13.5px;color:var(--ink-soft);margin-top:6px;}
+  .gate .go{display:inline-block;margin-top:12px;font-size:13px;color:var(--rust);letter-spacing:.05em;}
+
+  /* 页脚 */
+  footer.foot{max-width:760px;margin:0 auto;padding:54px 28px 64px;text-align:center;font-size:12.5px;color:var(--ink-soft);line-height:1.9;border-top:1px solid var(--line-soft);margin-top:50px;}
+  footer.foot .ft{font-family:"ZCOOL XiaoWei",serif;font-size:15px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px;}
+
+  /* 滚动渐显 */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  @media (max-width:760px){
+    .nav{padding:12px 16px;}
+    .gates{grid-template-columns:1fr;}
+    .chefs{gap:10px;}
+    .chef-link{transform:rotate(90deg);width:70px;height:40px;}
+    .places{flex-direction:column;gap:22px;align-items:center;}
+    .places::before{display:none;}
+    .place{width:auto;}
+  }
+
+  /* 无障碍:减少动效 */
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    .hero .bg-pattern,.hero .bg-glow .win,.steam path,.hero .scroll-hint .arrow{animation:none!important;}
+    .hero .title,.hero .sub,.hero .sub2,.hero .scroll-hint{animation:none!important;opacity:1;transform:none;}
+    .steam path{opacity:.28;}
+    .reveal{opacity:1;transform:none;transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航(滚动后渐入) -->
+<nav class="nav" id="nav">
+  <div class="brand">燕食记 <small>FOOD IS HEAVEN</small></div>
+  <ul>
+    <li><a href="index.html" class="active">欢迎</a></li>
+    <li><a href="characters.html">人物关系</a></li>
+    <li><a href="cuisine.html">书中美食</a></li>
+  </ul>
+</nav>
+
+<!-- ── 首屏 ── -->
+<header class="hero" id="hero">
+  <!-- 底层:回纹 -->
+  <div class="layer bg-pattern" style="background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2270%22 height=%2270%22><path d=%22M10 10h40v40h-30v-22h14v14%22 fill=%22none%22 stroke=%22%23B8893E%22 stroke-width=%221.2%22/></svg>');"></div>
+
+  <!-- 中层:满洲窗彩光 -->
+  <div class="layer bg-glow">
+    <svg class="win tl" viewBox="0 0 120 120" aria-hidden="true">
+      <g stroke="#C15F3C" stroke-width="2" fill="none"><rect x="10" y="10" width="100" height="100" rx="6"/>
+      <path d="M10 60h100M60 10v100M22 22l76 76M98 22l-76 76"/></g>
+      <g fill="#C15F3C" opacity=".5"><rect x="14" y="14" width="42" height="42"/></g>
+      <g fill="#B8893E" opacity=".5"><rect x="64" y="64" width="42" height="42"/></g>
+    </svg>
+    <svg class="win br" viewBox="0 0 120 120" aria-hidden="true">
+      <g stroke="#6B7A56" stroke-width="2" fill="none"><rect x="10" y="10" width="100" height="100" rx="6"/>
+      <path d="M10 60h100M60 10v100"/></g>
+      <g fill="#6B7A56" opacity=".45"><rect x="64" y="14" width="42" height="42"/></g>
+      <g fill="#B8893E" opacity=".4"><rect x="14" y="64" width="42" height="42"/></g>
+    </svg>
+  </div>
+
+  <!-- 前层:蒸笼 + 热气 -->
+  <div class="layer steamers">
+    <div class="steamer s1"><svg width="120" height="155" viewBox="0 0 120 155" aria-hidden="true"><g class="steam"><path d="M46 90 q-8 -18 2 -32 q8 -12 1 -24"/><path d="M62 88 q8 -18 -2 -32 q-8 -12 -1 -24"/><path d="M77 92 q-6 -16 3 -28 q7 -10 1 -20"/></g><g stroke="#8A7058" stroke-width="2.2"><ellipse cx="60" cy="142" rx="48" ry="12" fill="#E3D3B6"/><path d="M12 124 v18 a48 12 0 0 0 96 0 v-18Z" fill="#EBDDC4"/><ellipse cx="60" cy="124" rx="48" ry="12" fill="#F3E8D2"/><path d="M14 108 v14 a46 11 0 0 0 92 0 v-14Z" fill="#E7D8BC"/><ellipse cx="60" cy="108" rx="46" ry="11" fill="#F3E8D2"/><ellipse cx="60" cy="96" rx="46" ry="12" fill="#EFE2C8"/></g><g stroke="#C9B79A" stroke-width="1" opacity=".7"><line x1="38" y1="124" x2="38" y2="142"/><line x1="82" y1="124" x2="82" y2="142"/><line x1="60" y1="123" x2="60" y2="141"/></g></svg></div>
+    <div class="steamer s2"><svg width="120" height="155" viewBox="0 0 120 155" aria-hidden="true"><g class="steam"><path d="M46 90 q-8 -18 2 -32 q8 -12 1 -24"/><path d="M62 88 q8 -18 -2 -32 q-8 -12 -1 -24"/><path d="M77 92 q-6 -16 3 -28 q7 -10 1 -20"/></g><g stroke="#8A7058" stroke-width="2.2"><ellipse cx="60" cy="142" rx="48" ry="12" fill="#E3D3B6"/><path d="M12 124 v18 a48 12 0 0 0 96 0 v-18Z" fill="#EBDDC4"/><ellipse cx="60" cy="124" rx="48" ry="12" fill="#F3E8D2"/><path d="M14 108 v14 a46 11 0 0 0 92 0 v-14Z" fill="#E7D8BC"/><ellipse cx="60" cy="108" rx="46" ry="11" fill="#F3E8D2"/><ellipse cx="60" cy="96" rx="46" ry="12" fill="#EFE2C8"/></g><g stroke="#C9B79A" stroke-width="1" opacity=".7"><line x1="38" y1="124" x2="38" y2="142"/><line x1="82" y1="124" x2="82" y2="142"/><line x1="60" y1="123" x2="60" y2="141"/></g></svg></div>
+    <div class="steamer s3"><svg width="120" height="155" viewBox="0 0 120 155" aria-hidden="true"><g class="steam"><path d="M46 90 q-8 -18 2 -32 q8 -12 1 -24"/><path d="M62 88 q8 -18 -2 -32 q-8 -12 -1 -24"/><path d="M77 92 q-6 -16 3 -28 q7 -10 1 -20"/></g><g stroke="#8A7058" stroke-width="2.2"><ellipse cx="60" cy="142" rx="48" ry="12" fill="#E3D3B6"/><path d="M12 124 v18 a48 12 0 0 0 96 0 v-18Z" fill="#EBDDC4"/><ellipse cx="60" cy="124" rx="48" ry="12" fill="#F3E8D2"/><path d="M14 108 v14 a46 11 0 0 0 92 0 v-14Z" fill="#E7D8BC"/><ellipse cx="60" cy="108" rx="46" ry="11" fill="#F3E8D2"/><ellipse cx="60" cy="96" rx="46" ry="12" fill="#EFE2C8"/></g><g stroke="#C9B79A" stroke-width="1" opacity=".7"><line x1="38" y1="124" x2="38" y2="142"/><line x1="82" y1="124" x2="82" y2="142"/><line x1="60" y1="123" x2="60" y2="141"/></g></svg></div>
+  </div>
+
+  <div class="fade-bottom"></div>
+
+  <!-- 主体 -->
+  <div class="center">
+    <h1 class="title">燕食记</h1>
+    <p class="sub">两 代 厨 人 · 三 地 流 转</p>
+    <p class="sub2">葛亮 · 一部岭南饮食的长卷</p>
+  </div>
+
+  <a class="scroll-hint" href="#about">向下,翻开此书<span class="arrow">↓</span></a>
+</header>
+
+<!-- ── 关于此书 ── -->
+<section class="block reveal" id="about">
+  <div class="kicker">About</div>
+  <h2>关于《燕食记》</h2>
+  <div class="divider"></div>
+  <div class="about-wrap">
+    <figure class="book-cover">
+      <img src="book.jpg" alt="《燕食记》书籍封面" loading="lazy">
+    </figure>
+    <p class="lead">
+      《燕食记》是葛亮以岭南饮食为载体写就的长篇小说。书中两代厨人的命运、近百道粤菜与本帮菜、
+      广府—香港—上海三地的流转,共同筑起一座可以「被走进」的文化空间。
+      这个网站把这本书打开——让你沿着人物与菜品两条线索,在其间慢慢游走。
+      读过的人,可当作一份延伸阅读的地图;未读的人,愿它是一扇引你入席的门。
+    </p>
+  </div>
+</section>
+
+<!-- ── 关于作者 ── -->
+<section class="block reveal">
+  <div class="kicker">Author</div>
+  <h2>关于作者</h2>
+  <div class="divider"></div>
+  <div class="author-card">
+    <div class="author-badge" aria-hidden="true">葛</div>
+    <div class="atext">
+      <div class="aname">葛 亮 <small>当代小说家</small></div>
+      <p>
+        原籍南京,现居香港。香港大学中文系博士,长年任教于高校。其写作多以家族记忆、城市变迁与中国文化为题,
+        文字典雅,糅合古典笔法与现代叙事,被视为华语文坛「新古典」一脉的代表声音。著有长篇小说《朱雀》《北鸢》《燕食记》,
+        小说集《瓦猫》《问米》等,曾获鲁迅文学奖等多项华语文学奖项。
+        《燕食记》是他以岭南与江南饮食为载体的长篇近作——借两代厨人的际遇,写下半部近代南方的世情画卷。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 两代厨人 ── -->
+<section class="block reveal">
+  <div class="kicker">Two Generations</div>
+  <h2>两代厨人</h2>
+  <div class="divider"></div>
+  <div class="chefs">
+    <div class="chef">
+      <div class="badge" style="background:#B8893E">荣</div>
+      <div class="nm">荣贻生</div>
+      <div class="role">阿响 · 上代厨人</div>
+      <div class="line">般若庵的孩子,集三家点心绝艺于一身,同钦楼的大按师傅。</div>
+    </div>
+    <div class="chef-link" aria-hidden="true">
+      <span class="lbl">师承</span>
+      <svg viewBox="0 0 120 40"><path d="M4 20 H116" stroke="#B8893E" stroke-width="2" fill="none" stroke-dasharray="2 5" stroke-linecap="round"/><path d="M108 13 L118 20 L108 27" stroke="#B8893E" stroke-width="2" fill="none"/></svg>
+    </div>
+    <div class="chef">
+      <div class="badge" style="background:#B8893E">举</div>
+      <div class="nm">陈五举</div>
+      <div class="role">五举山伯 · 下代厨人</div>
+      <div class="line">荣贻生的二徒弟,在粤味与本帮十八行之间,结出一段新的味道。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 三地流转 ── -->
+<section class="block reveal">
+  <div class="kicker">Three Cities</div>
+  <h2>三地流转</h2>
+  <div class="divider"></div>
+  <div class="places">
+    <div class="place"><div class="node">广</div><div class="pn">广府</div><div class="pd">太史第与同钦楼,粤点蛇宴的源头</div></div>
+    <div class="place"><div class="node">港</div><div class="pn">香港</div><div class="pd">乱世南迁,十八行在异地落脚</div></div>
+    <div class="place"><div class="node">沪</div><div class="pn">上海</div><div class="pd">本帮苏浙味,与粤味在此交汇</div></div>
+  </div>
+</section>
+
+<!-- ── 入口卡 ── -->
+<section class="block reveal" style="padding-bottom:20px;">
+  <div class="kicker">Enter</div>
+  <h2>从两条线索走进</h2>
+  <div class="divider"></div>
+</section>
+<div class="gates reveal">
+  <a class="gate" href="characters.html">
+    <div class="thumb">
+      <svg viewBox="0 0 160 120" aria-hidden="true">
+        <g stroke="#B8893E" stroke-width="1.6" fill="none" opacity=".7">
+          <path d="M80 60 L40 36 M80 60 L120 36 M80 60 L40 84 M80 60 L120 84 M80 60 L80 24 M80 60 L80 96"/></g>
+        <g><circle cx="80" cy="60" r="16" fill="#B8893E"/><text x="80" y="66" font-family="ZCOOL XiaoWei,serif" font-size="16" fill="#fff" text-anchor="middle">响</text></g>
+        <g fill="#C15F3C"><circle cx="40" cy="36" r="9"/><circle cx="120" cy="36" r="9"/></g>
+        <g fill="#6B7A56"><circle cx="40" cy="84" r="9"/><circle cx="120" cy="84" r="9"/></g>
+        <g fill="#8A7058"><circle cx="80" cy="24" r="9"/><circle cx="80" cy="96" r="9"/></g>
+      </svg>
+    </div>
+    <div class="gmeta"><div class="gt">人物关系</div><div class="gd">38 位人物的关系之网,六分区、八色连线,点击展开人物卡。</div><span class="go">进入关系图 →</span></div>
+  </a>
+  <a class="gate" href="cuisine.html">
+    <div class="thumb">
+      <svg viewBox="0 0 160 120" aria-hidden="true">
+        <ellipse cx="80" cy="92" rx="60" ry="13" fill="#EBDDC4" stroke="#8A7058" stroke-width="1.6"/>
+        <ellipse cx="80" cy="86" rx="60" ry="13" fill="#F3E8D2" stroke="#8A7058" stroke-width="1.6"/>
+        <path d="M44 76 q-4 -18 18 -25 q20 -7 38 -1 q14 5 15 14 q1 9 -11 14 q-20 9 -42 5 q-15 -3 -18 -7Z" fill="#FBF4E6" stroke="#8A7058" stroke-width="2"/>
+        <g stroke="#7A6650" stroke-width="1.4" fill="none" stroke-linecap="round"><path d="M52 60 q3 -7 9 -8"/><path d="M62 56 q2 -7 8 -8"/><path d="M72 53 q2 -6 8 -7"/><path d="M82 53 q3 -5 8 -5"/></g>
+        <g stroke="#B8893E" stroke-width="1.2" fill="none" opacity=".5" stroke-linecap="round"><path d="M70 34 q-4 -7 1 -13"/><path d="M86 32 q4 -7 -1 -13"/></g>
+      </svg>
+    </div>
+    <div class="gmeta"><div class="gt">书中美食</div><div class="gd">茶点、蛇宴、素宴、粤味、本帮,四十道书中味,每道附插画与典故。</div><span class="go">进入美食页 →</span></div>
+  </a>
+</div>
+
+<!-- ── 页脚 ── -->
+<footer class="foot">
+  <div class="ft">关于本站</div>
+  本站是《燕食记》的非官方延伸阅读工具,人物与菜品资料综合自网络整理、专业书评与百科词条,
+  仍可能存在偏差,<b>以书中实际为准</b>。欢迎读者校正反馈。
+  <br><br>
+  <span style="font-family:'JetBrains Mono',monospace;letter-spacing:.1em;opacity:.7;">design by wanghao</span>
+</footer>
+
+<script>
+/* 顶部导航:滚出首屏后渐入 */
+const nav=document.getElementById("nav"),hero=document.getElementById("hero");
+function onScroll(){
+  if(window.scrollY>hero.offsetHeight*0.6) nav.classList.add("show");
+  else nav.classList.remove("show");
+}
+window.addEventListener("scroll",onScroll,{passive:true});
+onScroll();
+
+/* 滚动渐显 */
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});
+},{threshold:0.12});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

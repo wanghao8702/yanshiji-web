@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>燕食记 · 人物关系图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Claude 暖色调 */
+    --paper:#F4ECE0;        /* 奶油纸感暖米底色 */
+    --paper-2:#EDE3D4;
+    --ink:#3A2E26;          /* 墨棕主文字 */
+    --ink-soft:#6B5B4F;
+    --line-soft:#D8C9B4;
+    --gold:#B8893E;         /* 暖金 */
+    --rust:#C15F3C;         /* 赭红 */
+    --green:#6B7A56;        /* 墨绿 */
+    --crimson:#7A2A1A;      /* 暗红·反派 */
+
+    /* 关系类型分色 */
+    --rel-blood:#C15F3C;    /* 血缘 玫红 */
+    --rel-master:#B8893E;   /* 师承 暖金 */
+    --rel-spouse:#D4836A;   /* 夫妻 粉红 */
+    --rel-love:#A04A2A;     /* 情/爱 深红 */
+    --rel-fellow:#9B7B4F;   /* 同门 青铜 */
+    --rel-serve:#8A7058;    /* 主仆 灰金 */
+    --rel-friend:#6B7A56;   /* 挚友 墨绿 */
+    --rel-enemy:#7A2A1A;    /* 敌对/独立 暗红 */
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Noto Serif SC",serif;
+    color:var(--ink);
+    background:var(--paper);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.7;
+  }
+
+  /* ── 顶部导航(三页共享) ── */
+  .nav{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;
+    background:rgba(244,236,224,.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav .brand{
+    font-family:"ZCOOL XiaoWei",serif;
+    font-size:22px;letter-spacing:.12em;color:var(--ink);
+  }
+  .nav .brand small{
+    font-family:"JetBrains Mono",monospace;
+    font-size:11px;color:var(--ink-soft);letter-spacing:.18em;
+    margin-left:10px;text-transform:uppercase;
+  }
+  .nav ul{display:flex;gap:6px;list-style:none;margin:0;padding:0;}
+  .nav a{
+    text-decoration:none;color:var(--ink-soft);
+    padding:6px 16px;border-radius:20px;font-size:15px;
+    transition:.2s;
+  }
+  .nav a:hover{color:var(--ink);background:var(--paper-2);}
+  .nav a.active{color:#fff;background:var(--rust);}
+
+  /* ── 页头 ── */
+  header.hd{
+    text-align:center;padding:38px 20px 18px;
+  }
+  header.hd h1{
+    font-family:"ZCOOL XiaoWei",serif;
+    font-size:clamp(28px,4vw,44px);
+    letter-spacing:.1em;margin:0 0 10px;font-weight:400;
+  }
+  header.hd p{
+    margin:0 auto;max-width:640px;color:var(--ink-soft);
+    font-size:15px;
+  }
+
+  /* ── 关系类型图例 ── */
+  .legend{
+    display:flex;flex-wrap:wrap;gap:10px 18px;
+    justify-content:center;
+    max-width:880px;margin:18px auto 6px;padding:0 20px;
+  }
+  .legend .item{
+    display:flex;align-items:center;gap:7px;
+    font-size:13px;color:var(--ink-soft);cursor:default;
+  }
+  .legend .swatch{width:22px;height:3px;border-radius:2px;display:inline-block;}
+
+  /* ── 画布 ── */
+  .stage-wrap{padding:18px 24px 60px;}
+  .stage{
+    position:relative;
+    max-width:1240px;margin:0 auto;
+    border:1px solid var(--line-soft);
+    border-radius:18px;
+    background:var(--paper);
+    overflow:hidden;
+    box-shadow:0 10px 40px -22px rgba(58,46,38,.5);
+  }
+
+  /* 自绘岭南背景(满洲窗 / 蒸笼 / 广彩纹样,极弱) */
+  .stage .bg{
+    position:absolute;inset:0;z-index:0;pointer-events:none;
+    opacity:.5;
+  }
+
+  /* 连线层 */
+  .stage svg.links{
+    position:absolute;inset:0;z-index:1;pointer-events:none;
+    width:100%;height:100%;
+  }
+  .stage svg.links path{
+    fill:none;stroke-width:1.6;opacity:.5;
+    transition:opacity .25s, stroke-width .25s;
+  }
+  .stage svg.links path.dim{opacity:.06;}
+  .stage svg.links path.hot{opacity:.95;stroke-width:2.6;}
+
+  /* 区块网格 */
+  .grid{
+    position:relative;z-index:2;
+    display:grid;gap:16px;padding:22px;
+    grid-template-columns:repeat(12,1fr);
+    grid-auto-rows:min-content;
+  }
+  .zone{
+    border:1px dashed var(--line-soft);
+    border-radius:14px;
+    padding:14px 14px 16px;
+    background:rgba(237,227,212,.4);
+  }
+  .zone.plain{border:none;background:transparent;padding:6px;}
+  .zone > .ztitle{
+    font-family:"ZCOOL XiaoWei",serif;
+    font-size:15px;letter-spacing:.14em;
+    color:var(--gold);margin:0 0 12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .zone > .ztitle .idx{
+    font-family:"JetBrains Mono",monospace;font-size:12px;
+    color:#fff;background:var(--gold);
+    width:20px;height:20px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .zone .nodes{display:flex;flex-wrap:wrap;gap:14px 16px;align-items:flex-start;}
+
+  /* grid 列分配 */
+  .z-taishi  {grid-column:span 5;}
+  .z-banre   {grid-column:span 4;}
+  .z-villain {grid-column:span 3;}
+  .z-shicheng{grid-column:span 4;}
+  .z-center  {grid-column:span 4;display:flex;align-items:center;justify-content:center;}
+  .z-tudi    {grid-column:span 4;}
+  .z-qinggan {grid-column:span 4;}
+  .z-dai     {grid-column:span 5;}
+  .z-taonan  {grid-column:span 3;}
+  .z-narrator{grid-column:span 12;}
+  .z-narrator .nodes{justify-content:center;gap:40px;align-items:center;}
+
+  /* ── 人物徽章 ── */
+  .node{
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    width:74px;cursor:pointer;user-select:none;
+    transition:transform .2s;
+  }
+  .node:hover{transform:translateY(-3px);}
+  .badge{
+    position:relative;
+    width:52px;height:52px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"ZCOOL XiaoWei",serif;font-size:24px;color:#fff;
+    box-shadow:0 4px 12px -4px rgba(58,46,38,.55);
+    border:2px solid rgba(255,255,255,.6);
+    transition:box-shadow .2s,transform .2s;
+  }
+  .node.dimmed{opacity:.28;}
+  .node.focus .badge{box-shadow:0 0 0 4px rgba(193,95,60,.35),0 6px 16px -4px rgba(58,46,38,.6);}
+  .node .nm{font-size:12.5px;color:var(--ink);text-align:center;line-height:1.25;}
+  .node .nm .al{display:block;font-size:10px;color:var(--ink-soft);}
+  .badge .warn{
+    position:absolute;top:-5px;right:-5px;
+    font-size:13px;background:var(--paper);border-radius:50%;
+    width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 1px 4px rgba(0,0,0,.2);
+  }
+  .badge.center-badge{width:72px;height:72px;font-size:34px;border-width:3px;}
+  .node.is-center .nm{font-size:14px;font-weight:600;}
+
+  /* 中心人物光环 */
+  .node.is-center .badge{box-shadow:0 0 0 6px rgba(184,137,62,.18),0 8px 22px -6px rgba(58,46,38,.6);}
+
+  /* ── Modal 人物卡 ── */
+  .overlay{
+    position:fixed;inset:0;z-index:100;
+    background:rgba(40,30,22,.5);
+    backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  .overlay.show{display:flex;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .card{
+    width:min(560px,100%);max-height:86vh;overflow:auto;
+    background:var(--paper);border-radius:18px;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.5);
+    border:1px solid var(--line-soft);
+    animation:rise .3s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes rise{from{transform:translateY(18px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .card .top{
+    display:flex;gap:18px;align-items:center;
+    padding:26px 26px 18px;
+    border-bottom:1px solid var(--line-soft);
+    position:relative;
+  }
+  .card .cbadge{
+    width:64px;height:64px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"ZCOOL XiaoWei",serif;font-size:30px;color:#fff;
+    border:2px solid rgba(255,255,255,.6);
+  }
+  .card .cname{font-family:"ZCOOL XiaoWei",serif;font-size:28px;line-height:1.2;}
+  .card .calias{font-size:14px;color:var(--ink-soft);margin-top:2px;}
+  .card .crole{
+    display:inline-block;margin-top:8px;
+    font-size:12px;padding:3px 12px;border-radius:14px;
+    background:var(--paper-2);color:var(--ink-soft);
+    border:1px solid var(--line-soft);
+  }
+  .card .close{
+    position:absolute;top:16px;right:18px;
+    width:34px;height:34px;border:none;border-radius:50%;
+    background:var(--paper-2);color:var(--ink);
+    font-size:20px;cursor:pointer;line-height:1;
+    transition:.2s;
+  }
+  .card .close:hover{background:var(--rust);color:#fff;}
+  .card .body{padding:20px 26px 28px;}
+  .card .intro{font-size:15px;color:var(--ink);margin:0 0 18px;}
+  .card .sect-h{
+    font-family:"ZCOOL XiaoWei",serif;font-size:15px;color:var(--gold);
+    letter-spacing:.1em;margin:0 0 10px;
+  }
+  .card .rels{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .card .rels li{
+    display:flex;align-items:center;gap:10px;
+    font-size:14px;cursor:pointer;
+    padding:7px 10px;border-radius:10px;transition:.18s;
+  }
+  .card .rels li:hover{background:var(--paper-2);}
+  .card .rels .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .card .rels .rname{font-weight:600;}
+  .card .rels .rtype{color:var(--ink-soft);font-size:12.5px;}
+  .card .rels .go{margin-left:auto;color:var(--ink-soft);font-size:12px;}
+  .card .darkline{
+    margin-top:16px;padding:12px 14px;border-radius:12px;
+    background:rgba(122,42,26,.07);border:1px solid rgba(122,42,26,.25);
+    font-size:13.5px;color:var(--crimson);
+  }
+  .card .members{margin-top:4px;display:flex;flex-direction:column;gap:10px;}
+  .card .members .m{font-size:13.5px;}
+  .card .members .m b{color:var(--ink);}
+  .card .chap{margin-top:16px;font-size:12.5px;color:var(--ink-soft);}
+
+  /* 页脚来源说明 */
+  footer.src{
+    max-width:880px;margin:0 auto;padding:0 24px 60px;
+    font-size:12.5px;color:var(--ink-soft);line-height:1.9;
+  }
+  footer.src h4{font-family:"ZCOOL XiaoWei",serif;color:var(--gold);font-size:14px;margin:0 0 6px;letter-spacing:.1em;}
+  footer.src code{font-family:"JetBrains Mono",monospace;font-size:11px;}
+
+  /* 响应式:移动端可用 */
+  @media (max-width:820px){
+    .nav{padding:12px 16px;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .z-taishi,.z-banre,.z-villain,.z-shicheng,.z-center,
+    .z-tudi,.z-qinggan,.z-dai,.z-taonan{grid-column:span 2;}
+    .z-center{order:-1;}
+    .stage svg.links{display:none;} /* 移动端隐藏连线,改用卡内关系列表 */
+  }
+</style>
+</head>
+<body>
+
+<!-- ── 顶部导航 ── -->
+<nav class="nav">
+  <div class="brand">燕食记 <small>YANSHIJI</small></div>
+  <ul>
+    <li><a href="index.html">欢迎</a></li>
+    <li><a href="characters.html" class="active">人物关系</a></li>
+    <li><a href="cuisine.html">书中美食</a></li>
+  </ul>
+</nav>
+
+<header class="hd">
+  <h1>人物关系图</h1>
+  <p>《燕食记》两代厨人、三地流转、三十八位人物的命运之网。点击任一徽章,展开其身份、简介与关键关系；悬停可高亮关联连线。</p>
+</header>
+
+<!-- 关系类型图例 -->
+<div class="legend" id="legend"></div>
+
+<!-- ── 画布 ── -->
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <!-- 自绘岭南背景 -->
+    <svg class="bg" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <pattern id="huicai" width="70" height="70" patternUnits="userSpaceOnUse">
+          <!-- 广彩回纹 -->
+          <path d="M10 10h40v40h-30v-22h14v14" fill="none" stroke="#B8893E" stroke-width="1.2"/>
+        </pattern>
+        <radialGradient id="vig" cx="50%" cy="42%" r="75%">
+          <stop offset="0%" stop-color="#F4ECE0" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#C9B79A" stop-opacity=".5"/>
+        </radialGradient>
+      </defs>
+      <rect width="1200" height="720" fill="url(#huicai)" opacity=".14"/>
+      <!-- 满洲窗几何 -->
+      <g opacity=".1" stroke="#C15F3C" stroke-width="1.4" fill="none">
+        <rect x="80" y="60" width="120" height="120" rx="6"/>
+        <path d="M80 120h120M140 60v120M95 75l90 90M185 75l-90 90"/>
+        <rect x="1000" y="520" width="120" height="120" rx="6"/>
+        <path d="M1000 580h120M1060 520v120"/>
+      </g>
+      <!-- 蒸笼圆形堆叠剪影 -->
+      <g opacity=".08" stroke="#6B5B4F" stroke-width="1.4" fill="none">
+        <ellipse cx="980" cy="140" rx="78" ry="22"/>
+        <ellipse cx="980" cy="118" rx="78" ry="22"/>
+        <ellipse cx="980" cy="96"  rx="78" ry="22"/>
+        <ellipse cx="180" cy="600" rx="70" ry="20"/>
+        <ellipse cx="180" cy="580" rx="70" ry="20"/>
+      </g>
+      <rect width="1200" height="720" fill="url(#vig)"/>
+    </svg>
+
+    <!-- 连线层(JS 注入 path) -->
+    <svg class="links" id="links" aria-hidden="true"></svg>
+
+    <!-- 区块网格(JS 注入节点) -->
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<!-- 信息来源 -->
+<footer class="src">
+  <h4>关于本图</h4>
+  人物关系数据综合自:小红书博主「财糕八斗」整理图、中国作家网 / 广东作家网 / 香港文联等专业书评、百度百科《燕食记》词条。
+  ⚠️ 以上来源仍可能存在偏差,<b>以书中实际为准</b>。带 ⚠️ 标记者为葛亮故意留白的暗线(并非数据缺失)。欢迎读者校正反馈。
+</footer>
+
+<!-- ── Modal ── -->
+<div class="overlay" id="overlay">
+  <div class="card" id="card" role="dialog" aria-modal="true"></div>
+</div>
+
+<script>
+/* ===== 关系类型定义 ===== */
+const REL = {
+  blood:  {label:"血缘", color:"var(--rel-blood)"},
+  master: {label:"师承", color:"var(--rel-master)"},
+  spouse: {label:"夫妻", color:"var(--rel-spouse)"},
+  love:   {label:"情/爱", color:"var(--rel-love)"},
+  fellow: {label:"同门", color:"var(--rel-fellow)"},
+  serve:  {label:"主仆", color:"var(--rel-serve)"},
+  friend: {label:"挚友", color:"var(--rel-friend)"},
+  enemy:  {label:"敌对/独立", color:"var(--rel-enemy)"}
+};
+// 颜色取实际色值(供 SVG 描边)
+const RELC = {
+  blood:"#C15F3C", master:"#B8893E", spouse:"#D4836A", love:"#A04A2A",
+  fellow:"#9B7B4F", serve:"#8A7058", friend:"#6B7A56", enemy:"#7A2A1A"
+};
+
+/* ===== 人物数据(38 人 / 35 节点) ===== */
+const C = [
+  /* —— 核心主线 —— */
+  {id:"rongyisheng", name:"荣贻生", alias:"阿响 · 荣师傅", zone:"center", color:"#B8893E", center:true,
+   role:"主角 · 上代厨人", chapter:"上阕 / 下阕",
+   intro:"《燕食记》第一代厨人,同钦楼大按师傅。般若庵尼月傅与陈赫明之子,由扎脚尼慧生流离养育,先后拜叶七、袁仰三、秀明为师,集三家点心绝艺于一身。一生牵系司徒云重,收谢醒、陈五举为徒。",
+   rel:[["yuefu","blood","生母"],["chenheming","blood","生父"],["huisheng","blood","养母"],
+        ["yeqi","master","养父·师傅一"],["yuanyangsan","master","师傅二"],["xiuming","spouse","妻 / 师傅三"],
+        ["situyunzhong","love","灵魂伴侣"],["chenwuju","master","二徒弟"],["xiexing","master","大徒弟"]]},
+  {id:"chenwuju", name:"陈五举", alias:"五举山伯", zone:"tudi", color:"#B8893E",
+   role:"荣贻生二徒弟", chapter:"下阕",
+   intro:"荣贻生二徒弟,孤儿出身,由阿爷收留。先随「三只耳」师傅学小按,后投荣门。娶本帮十八行戴凤行,凤行意外身亡后,他承继十八行,在粤味与本帮之间结成新味。当代学者毛果的访谈对象。",
+   rel:[["rongyisheng","master","师傅"],["daifengxing","spouse","妻"],["sanzhier","master","启蒙师傅"],
+        ["age","friend","收留之恩"],["xiexing","fellow","同门师兄"],["maoguo","friend","受访"],["foodies","friend","十八行食客"]]},
+  {id:"maoguo", name:"毛果", alias:"当代叙述者", zone:"narrator", color:"#6B7A56",
+   role:"当代叙述者 · 学者", chapter:"贯穿全书",
+   intro:"当代学者,全书的叙述与考据者。以访谈陈五举为线索,一层层揭开荣贻生与两代厨人的往事,把广府、香港、上海三地的味道与命运重新连缀成书。",
+   rel:[["chenwuju","friend","访谈对象"]]},
+
+  /* —— 般若庵线(血亲) —— */
+  {id:"yuefu", name:"月傅", alias:"般若庵尼", zone:"banre", color:"#C15F3C",
+   role:"荣贻生生母", chapter:"上阕",
+   intro:"般若庵带发修行的尼姑,修岭南画派「二居」花鸟。与陈赫明在庵中相恋,产下阿响(荣贻生)。与慧生情同姐妹,乱世中将孩子托付于她。",
+   rel:[["rongyisheng","blood","子"],["chenheming","love","相恋于般若庵"],["huisheng","friend","挚友"],["nunabbess","serve","般若庵"]]},
+  {id:"chenheming", name:"陈赫明", alias:"—", zone:"banre", color:"#C15F3C",
+   role:"荣贻生生父", chapter:"上阕",
+   intro:"与月傅在般若庵相恋,荣贻生的生父。其更多身份是葛亮在书中半隐半显的留白之一。",
+   rel:[["yuefu","love","相恋"],["rongyisheng","blood","子"]]},
+  {id:"huisheng", name:"慧生", alias:"扎脚尼", zone:"banre", color:"#C15F3C",
+   role:"荣贻生养母", chapter:"上阕",
+   intro:"扎脚尼,原太史第丫鬟,曾侍奉九太太青湘与大少奶奶何颂瑛。乱世中带着阿响流离逃难,一手将他养大。与月傅是挚友,与叶七有情。",
+   rel:[["rongyisheng","blood","养子"],["yuefu","friend","挚友"],["yeqi","love","有情"],
+        ["jiutaitai","serve","旧主"],["heyongqing","serve","旧主"],["zhoushiniang","friend","逃难相遇"]]},
+
+  /* —— 师承谱系 —— */
+  {id:"yeqi", name:"叶凤池", alias:"叶七", zone:"shicheng", color:"#B8893E",
+   role:"养父 & 师傅一 · 洪门", chapter:"上阕",
+   intro:"荣贻生的养父与第一位师傅,洪门中人,身负家国。与慧生有情,与韩世江为同门。把一身点心绝艺与江湖道义一并传给阿响。",
+   rel:[["rongyisheng","master","徒 / 养子"],["huisheng","love","有情"],["hanshijiang","fellow","同门"]]},
+  {id:"yuanyangsan", name:"袁仰三", alias:"南天居", zone:"shicheng", color:"#B8893E",
+   role:"荣贻生师傅二", chapter:"上阕",
+   intro:"南天居名厨,荣贻生的第二位师傅,授其又一路点心与炉灶功夫。",
+   rel:[["rongyisheng","master","徒"]]},
+  {id:"xiuming", name:"秀明", alias:"—", zone:"qinggan", color:"#D4836A",
+   role:"师傅三 & 妻子", chapter:"上阕",
+   intro:"荣贻生的第三位师傅,后成为他的妻子。渴望安稳的烟火日子,是他颠沛半生里的归处。",
+   rel:[["rongyisheng","spouse","夫 / 徒"]]},
+  {id:"hanshijiang", name:"韩世江", alias:"得月阁", zone:"shicheng", color:"#9B7B4F",
+   role:"得月阁名厨", chapter:"上阕",
+   intro:"得月阁名厨,叶七的同门师兄弟,粤点一脉的重要人物。",
+   rel:[["yeqi","fellow","同门"]]},
+
+  /* —— 灵魂伴侣 —— */
+  {id:"situyunzhong", name:"司徒云重", alias:"益顺隆瓷坊", zone:"qinggan", color:"#A04A2A",
+   role:"荣贻生年少爱情理想", chapter:"上阕",
+   intro:"益顺隆瓷坊(广彩)司徒一族之人,荣贻生年少时的爱情理想与灵魂伴侣。专业书评称「司徒云重等人是谁,至终篇都没有答案」——其身世是全书最深的留白。",
+   rel:[["rongyisheng","love","灵魂伴侣"],["situlingsi","blood","女"]]},
+  {id:"situlingsi", name:"司徒灵思", alias:"—", zone:"qinggan", color:"#A04A2A", warn:true,
+   role:"司徒云重之女", chapter:"下阕",
+   dark:"司徒灵思的父亲是谁,书中始终没有挑明。这并非数据缺失,而是葛亮埋下的暗线。",
+   intro:"司徒云重之女。其父不详,是葛亮在书中故意留白的暗线之一。",
+   rel:[["situyunzhong","blood","母 / 父不详"]]},
+
+  /* —— 太史第 —— */
+  {id:"xiangtaishi", name:"向太史", alias:"太史第主人", zone:"taishi", color:"#8A7058",
+   role:"太史第主人 · 原型江孔殷", chapter:"上阕",
+   intro:"太史第主人,原型为清末民初岭南名士江孔殷(江太史)。一座太史第,聚起无数人的命运,也是粤菜「太史蛇羹」「太史菜」的源头。",
+   rel:[["xiangxikun","blood","子(七少爷)"],["xiangxiyun","blood","子"],["xiangwanshu","blood","五小姐"],["jiutaitai","spouse","九太太"]]},
+  {id:"xiangxikun", name:"向锡堃", alias:"七少爷", zone:"taishi", color:"#8A7058",
+   role:"太史第七少爷", chapter:"上阕 / 下阕",
+   intro:"太史第七少爷,侧室所生,后成为文化名人,收宋子游为徒。宋子游意外身亡后,他彻底「疯」了——是书中令人唏嘘的一笔。",
+   rel:[["xiangtaishi","blood","父"],["songziyou","master","徒弟"]]},
+  {id:"xiangxiyun", name:"向锡允", alias:"—", zone:"taishi", color:"#8A7058",
+   role:"太史第", chapter:"上阕",
+   intro:"太史第子弟,与大少奶奶何颂瑛私奔,一段乱了家规的情。",
+   rel:[["xiangtaishi","blood","父"],["heyongqing","love","私奔"]]},
+  {id:"heyongqing", name:"何颂瑛", alias:"大少奶奶", zone:"taishi", color:"#D4836A",
+   role:"太史第大少奶奶", chapter:"上阕",
+   intro:"太史第大少奶奶,与向锡允私奔。慧生曾侍奉于她。",
+   rel:[["xiangxiyun","love","私奔"],["huisheng","serve","旧仆"]]},
+  {id:"jiutaitai", name:"九太太青湘", alias:"青湘", zone:"taishi", color:"#8A7058", warn:true,
+   role:"太史第九太太 · 唱戏", chapter:"上阕",
+   dark:"九太太青湘的死因不明,荔枝树下了断——书中只留下一个静默的结局,死因是葛亮埋下的暗线。",
+   intro:"太史第九太太,出身唱戏。最终在荔枝树下了断,死因不明。慧生曾侍奉于她。",
+   rel:[["xiangtaishi","spouse","九太太"],["huisheng","serve","旧仆"]]},
+  {id:"xiangwanshu", name:"向宛舒", alias:"向家五小姐", zone:"taishi", color:"#8A7058",
+   role:"太史第五小姐", chapter:"上阕 / 下阕",
+   intro:"向家五小姐,办兰斋农场,培育出名动一时的「雾水荔枝」。一位把心血投向田园与物产的女子。",
+   rel:[["xiangtaishi","blood","父"]]},
+  {id:"laishen", name:"来婶", alias:"太史第帮工", zone:"taishi", color:"#8A7058",
+   role:"太史第帮工", chapter:"上阕",
+   intro:"太史第帮工,性子里有妒嫉,却不恶毒——是葛亮笔下一个有分寸的小人物。",
+   rel:[["xiangtaishi","serve","帮工"],["huisheng","fellow","同府"]]},
+  {id:"lixianshu", name:"利先叔", alias:"—", zone:"taishi", color:"#8A7058",
+   role:"太史第", chapter:"上阕",
+   intro:"太史第中人,操持府内事务的老仆之一。",
+   rel:[["xiangtaishi","serve","府中"]]},
+  {id:"nunabbess", name:"般若庵主", alias:"—", zone:"taishi", color:"#8A7058",
+   role:"般若庵主持", chapter:"上阕",
+   intro:"般若庵主持,势利却不刻薄。月傅修行于此庵。",
+   rel:[["yuefu","serve","庵中"]]},
+
+  /* —— 向锡堃徒弟 —— */
+  {id:"songziyou", name:"宋子游", alias:"—", zone:"taishi", color:"#B8893E",
+   role:"向锡堃徒弟", chapter:"下阕",
+   intro:"向锡堃的徒弟。意外身亡后,向锡堃彻底「疯」了——师徒一场,成了压垮人的最后一根稻草。",
+   rel:[["xiangxikun","master","师傅"]]},
+
+  /* —— 逃难安铺线 —— */
+  {id:"zhoushiniang", name:"周师娘", alias:"—", zone:"taonan", color:"#6B7A56",
+   role:"安铺逃难时相遇", chapter:"上阕",
+   intro:"慧生带阿响在安铺逃难时相遇的人,乱世中的一段萍水之情。",
+   rel:[["huisheng","friend","逃难相遇"]]},
+  {id:"jishu", name:"吉叔", alias:"—", zone:"taonan", color:"#6B7A56",
+   role:"安铺逃难时相遇", chapter:"上阕",
+   intro:"慧生母子在安铺逃难时相遇的人,患难中相互照应。",
+   rel:[["huisheng","friend","逃难相遇"]]},
+  {id:"yinguguu", name:"音姑姑", alias:"—", zone:"taonan", color:"#6B7A56",
+   role:"安铺逃难时相遇", chapter:"上阕",
+   intro:"安铺逃难时相遇,乱世里忍辱负重的女子,一段被时代碾过的身影。",
+   rel:[["huisheng","friend","逃难相遇"]]},
+
+  /* —— 戴家 · 本帮十八行 —— */
+  {id:"daimingyi", name:"戴明义", alias:"十八行创始", zone:"dai", color:"#C15F3C",
+   role:"十八行创始 · 戴凤行父", chapter:"下阕",
+   intro:"上海本帮「十八行」的创始人,戴凤行之父。一手本帮手艺,后由女婿陈五举承继。",
+   rel:[["daifengxing","blood","女"],["sue","spouse","妻"],["daide","blood","子"]]},
+  {id:"sue", name:"素娥", alias:"—", zone:"dai", color:"#D4836A",
+   role:"戴凤行母", chapter:"下阕",
+   intro:"戴明义之妻,戴凤行与戴得的母亲。本帮人家的当家主母。",
+   rel:[["daimingyi","spouse","夫"],["daifengxing","blood","女"]]},
+  {id:"daifengxing", name:"戴凤行", alias:"—", zone:"dai", color:"#D4836A",
+   role:"陈五举之妻", chapter:"下阕",
+   intro:"戴明义之女,陈五举之妻。把本帮的味道与情意交付给五举,却意外身亡——成为五举命运的转折。",
+   rel:[["chenwuju","spouse","夫"],["daimingyi","blood","父"],["sue","blood","母"],["daide","blood","弟"]]},
+  {id:"daide", name:"戴得", alias:"—", zone:"dai", color:"#C15F3C",
+   role:"戴凤行之弟", chapter:"下阕",
+   intro:"戴凤行之弟,后娶头牌吧女露露。十八行的下一代。",
+   rel:[["daifengxing","blood","姊"],["daimingyi","blood","父"],["lulu","spouse","妻"]]},
+  {id:"age", name:"阿爷", alias:"—", zone:"dai", color:"#6B7A56",
+   role:"收留陈五举", chapter:"下阕",
+   intro:"收留孤儿陈五举的长者,给了他乱世里第一处安身之所。",
+   rel:[["chenwuju","friend","收留之恩"]]},
+
+  /* —— 同钦楼 · 十八行周边 —— */
+  {id:"sanzhier", name:"「三只耳」师傅", alias:"三只耳", zone:"tudi", color:"#B8893E",
+   role:"五举启蒙师傅", chapter:"下阕",
+   intro:"陈五举初学小按时的师傅,人称「三只耳」。五举手艺的最初一课从他这里开始。",
+   rel:[["chenwuju","master","徒弟"]]},
+  {id:"xiexing", name:"谢醒", alias:"—", zone:"tudi", color:"#B8893E",
+   role:"荣贻生大徒弟", chapter:"下阕",
+   intro:"荣贻生的大徒弟,后到香港十八行。与头牌吧女露露有一段情。",
+   rel:[["rongyisheng","master","师傅"],["chenwuju","fellow","同门师弟"],["lulu","love","情人"]]},
+  {id:"lulu", name:"露露", alias:"头牌吧女", zone:"tudi", color:"#D4836A",
+   role:"头牌吧女", chapter:"下阕",
+   intro:"舞厅头牌吧女,谢醒的情人,后嫁戴得。乱世风尘里一个有自己活法的女子。",
+   rel:[["xiexing","love","情人"],["daide","spouse","夫"]]},
+  {id:"foodies", name:"十八行食客群", alias:"邵公 · 老克蜡 · 麻甩佬 · 司马先生", zone:"tudi", color:"#9B7B4F",
+   role:"十八行食客群(4 人)", chapter:"下阕",
+   members:[
+     ["邵公","十八行常客,有身份有故事的老食客。"],
+     ["「老克蜡」","上海弄堂里讲究腔调的老派食客。"],
+     ["「麻甩佬」","市井气十足的熟客,十八行的烟火底色。"],
+     ["司马先生","谈吐不俗的食客,见证十八行的流转。"]
+   ],
+   intro:"十八行的四位常客——邵公、「老克蜡」、「麻甩佬」、司马先生。他们围着一张张桌子,构成了十八行的人间烟火。点击展开查看各位简介。",
+   rel:[["chenwuju","friend","十八行食客"]]},
+
+  /* —— 反派 —— */
+  {id:"hechuan", name:"河川守智", alias:"日本特务", zone:"villain", color:"#7A2A1A",
+   role:"反派 · 日本特务", chapter:"上阕 / 下阕",
+   intro:"日本特务,唱昆曲、能剧,以文雅之皮包藏祸心。是书中阴影所在,独立于诸般人情之外。",
+   rel:[["rongyisheng","enemy","敌对"]]}
+];
+
+const BY_ID = Object.fromEntries(C.map(c=>[c.id,c]));
+
+/* ===== 区块定义 ===== */
+const ZONES = [
+  {key:"taishi",   idx:"①", title:"太史第",     cls:"z-taishi"},
+  {key:"banre",    idx:"②", title:"般若庵线",   cls:"z-banre"},
+  {key:"villain",  idx:"⑦", title:"反派 · 独立", cls:"z-villain"},
+  {key:"shicheng", idx:"④", title:"师承",       cls:"z-shicheng"},
+  {key:"center",   idx:"③", title:"",           cls:"z-center", plain:true},
+  {key:"tudi",     idx:"⑥", title:"徒弟一脉",   cls:"z-tudi"},
+  {key:"qinggan",  idx:"⑤", title:"情感",       cls:"z-qinggan"},
+  {key:"dai",      idx:"⑧", title:"戴家 · 本帮十八行", cls:"z-dai"},
+  {key:"taonan",   idx:"·", title:"逃难安铺线", cls:"z-taonan"},
+  {key:"narrator", idx:"⑨", title:"当代叙述",   cls:"z-narrator"}
+];
+
+/* ===== 渲染图例 ===== */
+const legend = document.getElementById("legend");
+Object.values(REL).forEach(r=>{
+  const el=document.createElement("div");
+  el.className="item";
+  el.innerHTML=`<span class="swatch" style="background:${r.color}"></span>${r.label}`;
+  legend.appendChild(el);
+});
+
+/* ===== 渲染节点 ===== */
+const grid=document.getElementById("grid");
+ZONES.forEach(z=>{
+  const zoneEl=document.createElement("section");
+  zoneEl.className="zone "+z.cls+(z.plain?" plain":"");
+  if(z.title){
+    zoneEl.innerHTML=`<p class="ztitle"><span class="idx">${z.idx}</span>${z.title}</p>`;
+  }
+  const nodes=document.createElement("div");
+  nodes.className="nodes";
+  C.filter(c=>c.zone===z.key).forEach(c=>{
+    nodes.appendChild(makeNode(c));
+  });
+  zoneEl.appendChild(nodes);
+  grid.appendChild(zoneEl);
+});
+
+function makeNode(c){
+  const n=document.createElement("div");
+  n.className="node"+(c.center?" is-center":"");
+  n.dataset.id=c.id;
+  const first=[...c.name][0]==="「"?[...c.name][1]:[...c.name][0];
+  const badgeFirst = c.id==="foodies" ? "食" : first;
+  n.innerHTML=`
+    <div class="badge${c.center?' center-badge':''}" style="background:${c.color}">
+      ${badgeFirst}${c.warn?'<span class="warn" title="葛亮埋下的暗线">⚠️</span>':''}
+    </div>
+    <div class="nm">${c.name}${c.alias&&c.alias!=="—"?`<span class="al">${shortAlias(c.alias)}</span>`:''}</div>`;
+  n.addEventListener("click",()=>openCard(c.id));
+  n.addEventListener("mouseenter",()=>highlight(c.id));
+  n.addEventListener("mouseleave",()=>highlight(null));
+  return n;
+}
+function shortAlias(a){const p=a.split(" · ")[0].split(" ")[0];return p.length>6?p.slice(0,6):p;}
+
+/* ===== 连线 ===== */
+const linksSvg=document.getElementById("links");
+const stage=document.getElementById("stage");
+let EDGES=[]; // {a,b,type,el}
+
+function buildEdges(){
+  linksSvg.innerHTML="";
+  EDGES=[];
+  const seen=new Set();
+  C.forEach(c=>{
+    (c.rel||[]).forEach(([to,type])=>{
+      const key=[c.id,to].sort().join("|")+"|"+type;
+      if(seen.has(key)||!BY_ID[to])return;
+      seen.add(key);
+      const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+      p.setAttribute("stroke",RELC[type]||"#999");
+      linksSvg.appendChild(p);
+      EDGES.push({a:c.id,b:to,type,el:p});
+    });
+  });
+}
+function center(id){
+  const node=grid.querySelector(`.node[data-id="${id}"] .badge`);
+  if(!node)return null;
+  const sr=stage.getBoundingClientRect();
+  const r=node.getBoundingClientRect();
+  return {x:r.left-sr.left+r.width/2, y:r.top-sr.top+r.height/2};
+}
+function drawEdges(){
+  EDGES.forEach(e=>{
+    const a=center(e.a), b=center(e.b);
+    if(!a||!b){e.el.setAttribute("d","");return;}
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    const dx=b.x-a.x, dy=b.y-a.y;
+    const curve=Math.min(60,Math.hypot(dx,dy)*0.18);
+    const nx=-dy, ny=dx, len=Math.hypot(nx,ny)||1;
+    const cx=mx+(nx/len)*curve, cy=my+(ny/len)*curve;
+    e.el.setAttribute("d",`M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}`);
+  });
+}
+
+/* 高亮 */
+function highlight(id){
+  if(!id){
+    EDGES.forEach(e=>e.el.classList.remove("hot","dim"));
+    grid.querySelectorAll(".node").forEach(n=>n.classList.remove("dimmed","focus"));
+    return;
+  }
+  const linked=new Set([id]);
+  EDGES.forEach(e=>{
+    const on = e.a===id||e.b===id;
+    e.el.classList.toggle("hot",on);
+    e.el.classList.toggle("dim",!on);
+    if(on){linked.add(e.a);linked.add(e.b);}
+  });
+  grid.querySelectorAll(".node").forEach(n=>{
+    const nid=n.dataset.id;
+    n.classList.toggle("focus",nid===id);
+    n.classList.toggle("dimmed",!linked.has(nid));
+  });
+}
+
+/* ===== Modal 人物卡 ===== */
+const overlay=document.getElementById("overlay");
+const card=document.getElementById("card");
+
+function openCard(id){
+  const c=BY_ID[id];if(!c)return;
+  const first=c.id==="foodies"?"食":([...c.name][0]==="「"?[...c.name][1]:[...c.name][0]);
+  let relsHtml="";
+  (c.rel||[]).forEach(([to,type,label])=>{
+    const t=BY_ID[to];if(!t)return;
+    relsHtml+=`<li data-go="${to}">
+      <span class="dot" style="background:${RELC[type]}"></span>
+      <span class="rname">${t.name}</span>
+      <span class="rtype">· ${REL[type].label}${label?" · "+label:""}</span>
+      <span class="go">查看 →</span></li>`;
+  });
+  let membersHtml="";
+  if(c.members){
+    membersHtml=`<p class="sect-h">食客名录</p><div class="members">`+
+      c.members.map(m=>`<div class="m"><b>${m[0]}</b> — ${m[1]}</div>`).join("")+`</div>`;
+  }
+  card.innerHTML=`
+    <div class="top">
+      <div class="cbadge" style="background:${c.color}">${first}</div>
+      <div>
+        <div class="cname">${c.name}</div>
+        ${c.alias&&c.alias!=="—"?`<div class="calias">${c.alias}</div>`:""}
+        <span class="crole">${c.role}</span>
+      </div>
+      <button class="close" aria-label="关闭">×</button>
+    </div>
+    <div class="body">
+      <p class="intro">${c.intro}</p>
+      ${c.dark?`<div class="darkline">⚠️ <b>葛亮埋下的暗线:</b>${c.dark}</div>`:""}
+      ${relsHtml?`<p class="sect-h">关键关系</p><ul class="rels">${relsHtml}</ul>`:""}
+      ${membersHtml}
+      ${c.chapter?`<p class="chap">出现章节:${c.chapter}</p>`:""}
+    </div>`;
+  card.querySelector(".close").addEventListener("click",closeCard);
+  card.querySelectorAll(".rels li").forEach(li=>{
+    li.addEventListener("click",()=>openCard(li.dataset.go));
+  });
+  overlay.classList.add("show");
+}
+function closeCard(){overlay.classList.remove("show");}
+overlay.addEventListener("click",e=>{if(e.target===overlay)closeCard();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard();});
+
+/* ===== 初始化 ===== */
+function init(){
+  buildEdges();
+  // 等字体/布局稳定后绘线
+  requestAnimationFrame(()=>requestAnimationFrame(drawEdges));
+}
+window.addEventListener("load",init);
+window.addEventListener("resize",()=>{drawEdges();});
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(drawEdges);}
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# Vercel 本地链接 / 缓存
+.vercel
+
+# 依赖与系统文件
+node_modules/
+.DS_Store
+Thumbs.db
+
+# 内部文档,不公开
+燕食记网站_PRD_v1.0_终版.md
+docs/

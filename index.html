@@ -140,7 +140,7 @@
   .place .pd{font-size:13px;color:var(--ink-soft);margin-top:4px;}
 
   /* 入口卡 */
-  .gates{max-width:920px;margin:10px auto 0;padding:30px 28px 0;display:grid;gap:24px;grid-template-columns:1fr 1fr;}
+  .gates{max-width:920px;margin:10px auto 0;padding:30px 28px 0;display:grid;gap:24px;grid-template-columns:repeat(3,1fr);}
   .gate{position:relative;display:block;text-decoration:none;color:inherit;border:1px solid var(--line-soft);border-radius:18px;overflow:hidden;
     background:var(--paper);box-shadow:0 10px 30px -22px rgba(58,46,38,.6);transition:.28s;}
   .gate:hover{transform:translateY(-5px);border-color:var(--gold);box-shadow:0 20px 40px -20px rgba(58,46,38,.55);}
@@ -341,7 +341,7 @@
 <!-- ── 入口卡 ── -->
 <section class="block reveal" style="padding-bottom:20px;">
   <div class="kicker">Enter</div>
-  <h2>从两条线索走进</h2>
+  <h2>从三条线索走进</h2>
   <div class="divider"></div>
 </section>
 <div class="gates reveal">
@@ -369,6 +369,23 @@
       </svg>
     </div>
     <div class="gmeta"><div class="gt">书中美食</div><div class="gd">茶点、蛇宴、素宴、粤味、本帮,四十道书中味,每道附插画与典故。</div><span class="go">进入美食页 →</span></div>
+  </a>
+  <a class="gate" href="reading.html">
+    <div class="thumb">
+      <svg viewBox="0 0 160 120" aria-hidden="true">
+        <g fill="#FBF4E6" stroke="#8A7058" stroke-width="2">
+          <path d="M80 32 q-26 -10 -52 -5 v60 q26 -6 52 5Z"/>
+          <path d="M80 32 q26 -10 52 -5 v60 q-26 -6 -52 5Z"/>
+        </g>
+        <line x1="80" y1="32" x2="80" y2="92" stroke="#8A7058" stroke-width="2"/>
+        <g stroke="#B8893E" stroke-width="2" stroke-linecap="round" opacity=".65">
+          <path d="M36 48 h32"/><path d="M36 58 h32"/><path d="M36 68 h27"/>
+          <path d="M92 48 h32"/><path d="M92 58 h32"/><path d="M92 68 h27"/>
+        </g>
+        <text x="80" y="26" font-family="ZCOOL XiaoWei,serif" font-size="20" fill="#C15F3C" text-anchor="middle">「」</text>
+      </svg>
+    </div>
+    <div class="gmeta"><div class="gt">字里行间</div><div class="gd">精选书中动人段落,配文学随笔点评,分承味、古韵、入微三辑细读。</div><span class="go">进入字里行间 →</span></div>
   </a>
 </div>
 

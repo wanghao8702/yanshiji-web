@@ -31,13 +31,22 @@
   header.hd h1{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(28px,4vw,44px);letter-spacing:.12em;margin:0 0 12px;font-weight:400;}
   header.hd p{margin:0 auto;max-width:640px;color:var(--ink-soft);font-size:15px;line-height:1.8;}
 
+  /* ── 分栏切换 ── */
+  .tabs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:760px;margin:26px auto 4px;padding:0 26px;}
+  .tab{font-family:"ZCOOL XiaoWei",serif;font-size:16px;letter-spacing:.12em;padding:8px 24px;border-radius:22px;
+    border:1px solid var(--line-soft);background:var(--paper);color:var(--ink-soft);cursor:pointer;transition:.2s;}
+  .tab .ct{font-family:"JetBrains Mono",monospace;font-size:11px;margin-left:7px;opacity:.7;}
+  .tab:hover{border-color:var(--gold);color:var(--ink);}
+  .tab.active{background:var(--rust);color:#fff;border-color:var(--rust);}
+
   /* ── 主题分区 ── */
-  .zone{max-width:760px;margin:0 auto;padding:0 26px;}
-  .zone-head{text-align:center;margin:56px 0 6px;}
+  .zone{max-width:760px;margin:0 auto;padding:0 26px;display:none;}
+  .zone.active{display:block;animation:zfade .35s ease;}
+  @keyframes zfade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .zone-head{text-align:center;margin:30px 0 6px;}
   .zone-head .zk{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.26em;color:var(--gold);text-transform:uppercase;}
-  .zone-head h2{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(26px,3.6vw,36px);letter-spacing:.18em;margin:6px 0 6px;font-weight:400;}
-  .zone-head .zd{font-size:13.5px;color:var(--ink-soft);letter-spacing:.04em;}
-  .zone-rule{width:50px;height:2px;background:var(--gold);opacity:.5;margin:14px auto 0;border-radius:2px;}
+  .zone-head .zd{font-size:14px;color:var(--ink-soft);letter-spacing:.04em;margin-top:5px;}
+  .zone-rule{width:50px;height:2px;background:var(--gold);opacity:.5;margin:12px auto 0;border-radius:2px;}
 
   /* ── 单条段落 ── */
   .entry{margin:42px auto 60px;}
@@ -65,10 +74,6 @@
 
   footer.src{max-width:720px;margin:30px auto 0;padding:0 26px 64px;font-size:12.5px;color:var(--ink-soft);line-height:1.9;text-align:center;}
   footer.src h4{font-family:"ZCOOL XiaoWei",serif;color:var(--gold);font-size:14px;margin:40px 0 6px;letter-spacing:.1em;}
-
-  /* 滚动渐显 */
-  .reveal{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s ease;}
-  .reveal.in{opacity:1;transform:translateY(0);}
 
   @media (max-width:760px){
     .nav{padding:12px 16px;}
@@ -104,7 +109,7 @@
   @media (prefers-reduced-motion:reduce){
     .player .disc{animation:none!important;}
     html{scroll-behavior:auto;}
-    .reveal{opacity:1;transform:none;transition:none;}
+    .zone.active{animation:none;}
   }
 </style>
 </head>
@@ -126,6 +131,7 @@
   <p>选《燕食记》里最动人的段落，一段原文，一则随笔。葛亮的文字写味、写人、写时代——读过的人重温，未读的人，愿你由此入席。</p>
 </header>
 
+<div class="tabs" id="tabs"></div>
 <main id="zones"></main>
 
 <footer class="src">
@@ -182,12 +188,50 @@ const ZONES=[
           "明义呢，长处是因材制宜。素娥的口味浓厚，爱吃一道八宝辣酱。本是不起眼的家常菜，不过是将虾仁、鸡丁、肉丁、花生米、鸭肫片、笋丁用豆瓣酱炒在一起，无甚出奇。可他来做，平日有平日的朴质，节庆便有节庆的气派。沪上到了中秋，吃的也是酥皮的苏式月饼。明义便跟那做点心的师傅，求酥皮的制法，实验了多次，终于成了。自己用辣酱做馅儿，做成了独他一份的辣酱月饼，给素娥吃。看妻吃得高兴，他心里也便说不出的适意。外头一轮圆月，抿一口花雕。天上人间，不知今夕何年。"
         ],
         review:"戴明义的好手艺，来路是一位烧本帮菜的老厨——「铲刀帮」的经验，加上自己多年的心得，全收在这一段里。葛亮写家常，不写珍馐，只写时令：春的油焖笋、夏的糟味、秋冬的浓油赤酱，一焖一煨，便见功夫。而最动人的是那只辣酱月饼——本登不上大雅的八宝辣酱，被他酿进苏式酥皮，做成独一份的心意。看妻吃得高兴，他心里「说不出的适意」。寻常一餐一饭里，藏着手艺，也藏着情意；末句「不知今夕何年」，更把一桌家常，写出了天上人间的温柔。"
+      },
+      {
+        src:"礼云子 · 百鲜之首",
+        hook:"它是百鲜之首。",
+        passage:[
+          "当晚，阿响吃到了一碗「礼云子」捞面。这对他幼小的味觉造成了击打，让他第一次领受了「鲜」字，可予人带来的感动。及至多年后，这丰腴的味道如同一道烙印，在他的舌尖上历久弥新。",
+          "他呆呆坐在后厨的台阶上，看着太史的饭厅灯火通明。曾一年一度，向家呼亲唤友，举办礼云子的聚餐。这一餐有着黄粱一梦般的短暂与不真实。逢翌日，每个人说起，在回味中，都带着意犹未尽的叹息。",
+          "太史第的大厨利先叔，以最快的速度，将这鲜美的食材，以各种方式进行烹饪。愈是简单，如蒸蛋清或酿豆腐，愈可得其妙。再如煎薄饼，在福建润饼上撒上鸡丝、肉丝、冬菇丝、笋丝、鲜虾肉、蟹肉、蛋皮丝、韭黄、芫荽，那一小撮礼云子，是最后的点睛。它橙中带红，在其他馅料中隐现。这些馅料清淡，杜绝芥酱，方能彰显礼云子真味。它是百鲜之首。",
+          "中国人脍不厌细，并不缺少时令的食物。但如礼云子一般昙花一现的食材，仍在少数。它本不贵重，却因物以稀为贵，随节令稍纵即逝。礼云子之名隽雅，实为岭南田间小螃蟹所生之卵。这种螃蟹不过半个食指大小，又称蟛蜞。每年春末，清明前后，正值禾麦生穗，农人们下水田中捕捉育卵的母蟹，揭蟹腹将卵洗出，以细盐腌制，盛在陶盅。因其完全野生，且极易腐败，所以被称为难得的「俏食」，需尽速食用。",
+          "关于此物何以得名，查考典籍方知，其双螯甚巨，行走如作揖状，似古人见面拱手为礼。故称「礼云」，其膥即礼云子。《论语》曰：「礼云礼云，玉帛云乎哉？」可见其内寓意。"
+        ],
+        review:"礼云子，岭南田间蟛蜞之卵，本不贵重，却因清明前后稍纵即逝而成「俏食」。葛亮写它，从阿响舌尖第一次被「鲜」字击中写起，到利先叔「愈简单愈得其妙」的烹法，再到查考典籍、以《论语》「礼云礼云」点出名字的由来——一味小食，被他写出了三重境界：味觉的、手艺的、文化的。所谓「中国人脍不厌细」，细的不只是刀工，更是对时令的敬惜、对真味的克制（「杜绝芥酱，方能彰显礼云子真味」）。读罢方知，「百鲜之首」四字，分量何其重。"
+      },
+      {
+        src:"熔金煮玉 · 一碗白粥",
+        hook:"其实简单得很，无非就是舍得花功夫。",
+        passage:[
+          "月傅仍不作声。他便道，师父那道「熔金煮玉」，该怎么煮，可否赐教一二。",
+          "这倒让月傅意外。她只听说这人来头不小，是陈大帅的亲信，风华正茂。来找她，不谈风月，不论时事捭阖，倒来问一碗粥。",
+          "她想想，说，其实简单得很，无非就是舍得花功夫。米好水好。",
+          "陈赫明笑，说，怎么个好法。",
+          "月傅说，米是新收的竹溪贡米，周家磅的一亩四分「天水田」，稻熟可早七八天。入水浆如乳，不黏不糯，粒粒分明。煮粥的水，一为泉，次为溪，最次为井水。我这用的，是白云山上的日息泉，每日朝露而出，日升而息。赶那黎明的一个时辰打水，水质格外洁净甘洌。",
+          "陈赫明说，果然是有门道。那笋呢？",
+          "月傅说，是埔田的「岭南珍」。只用那重阳的头茬笋，蜜渍了用蜡封上，用的是「汤绽梅」的法子。一年几时取来用，都新鲜如初。",
+          "陈赫明赞道，原来如此！我说怎么我在一碗白粥里喝出了「活气」。"
+        ],
+        review:"一碗看似最朴素的白粥，藏着最不肯将就的功夫。陈赫明来问，月傅只答六个字：「舍得花功夫，米好水好。」可这「好」字落到实处，是竹溪贡米、白云山日息泉黎明一时辰打的水、重阳头茬笋以「汤绽梅」蜜渍蜡封——道道都不肯省。葛亮借一问一答，把岭南厨人对待食材的虔诚一层层剥开。所谓「熔金煮玉」，煮的是粥，炼的是心性。末句「我在一碗白粥里喝出了活气」最妙——真正的手艺，是能让最寻常的东西，活过来。"
       }
     ]
   },
   {
     name:"古韵", kicker:"Antiquity", desc:"遣词造句里的古意",
     entries:[
+      {
+        src:"得月阁 · 满洲窗",
+        hook:"一连十几扇海黄的满洲窗，将近午的阳光滤过的，笼在人身上，整室便都是一层暖。",
+        passage:[
+          "阿响是在中午时到达西关的。纵是市井寥落，荔湾湖的风光依旧。",
+          "他看眼前的建筑，三层，虽称不上巍峨，却有洋派大厦难当的气势。门口悬着牌匾，上面是草书的「得月」二字。",
+          "他走进去，没承想，这里却是人声鼎沸。仿佛街面上的人，都聚了齐全，俨然一个小世界。企堂与茶博士穿梭其间，与茶客一般，神色都是怡然的。",
+          "茶楼是广府人的面子，时移势易，哪怕是回光返照，都要撑起一个排场。这排场又是阿响未见过的。一连十几扇海黄的满洲窗，将近午的阳光滤过的，笼在人身上，整室便都是一层暖。"
+        ],
+        review:"葛亮写茶楼，不写一菜一点，先写一室的光。十几扇海黄满洲窗把近午的阳光滤成暖色，笼在每个人身上——「整室便都是一层暖」，一个「暖」字，把广府茶楼的人气与体面都收住了。市井虽寥落，茶楼却仍人声鼎沸，企堂、茶博士、茶客神色怡然，俨然一个自足的小世界。所谓「茶楼是广府人的面子」，哪怕回光返照也要撑起排场——这一笔，写的是一座城对生活的执拗与体面。读到这里，仿佛自己也坐进了那片满洲窗下的暖光里。"
+      },
       {
         src:"上阕·第九章 烽火硝烟",
         hook:"你要是能拉开，小观山门可就敞开了。",
@@ -212,21 +256,40 @@ const ZONES=[
   },
   {
     name:"入微", kicker:"Nuance", desc:"人物细节与心情的细致描写",
-    entries:[]
+    entries:[
+      {
+        src:"礼云子粉粿 · 太史的百感交集",
+        hook:"他吃着为他特制的礼云子粉粿，百感交集。",
+        passage:[
+          "此刻，太史吃着为他特制的礼云子粉粿，百感交集。他想，在这非常时日，来自「获德园」的礼云子，或者就是李将军这个情感粗疏的友人，对他细腻的慰藉。"
+        ],
+        review:"短短两句，写尽乱世里的人情。同样一味礼云子，前一处是「百鲜之首」的讲究，这一处却成了「细腻的慰藉」。太史的百感交集，葛亮不铺陈，只点一句：那位情感粗疏的李将军，竟以一份时令俏食，递来最不动声色的体贴。「粗疏」与「细腻」一字之对，把乱世故交之间欲说还休的情分写得入木三分。所谓入微，正是这样——不写眼泪，只写一个人对着一碟粉粿时，心里翻涌的千言万语。"
+      }
+    ]
   }
 ];
 
-/* ============ 渲染 ============ */
+/* ============ 渲染 + 分栏切换 ============ */
 (function(){
-  const root=document.getElementById("zones");
-  ZONES.forEach(z=>{
+  const root=document.getElementById("zones"), tabbar=document.getElementById("tabs");
+  ZONES.forEach((z,zi)=>{
+    /* 选项卡 */
+    const btn=document.createElement("button");
+    btn.className="tab"+(zi===0?" active":"");
+    btn.type="button";
+    btn.dataset.idx=zi;
+    btn.innerHTML=`${z.name}<span class="ct">${z.entries.length}</span>`;
+    tabbar.appendChild(btn);
+
+    /* 分区面板 */
     const sec=document.createElement("section");
-    sec.className="zone";
-    let html=`<div class="zone-head reveal"><div class="zk">${z.kicker}</div><h2>${z.name}</h2><div class="zd">${z.desc}</div><div class="zone-rule"></div></div>`;
+    sec.className="zone"+(zi===0?" active":"");
+    sec.dataset.idx=zi;
+    let html=`<div class="zone-head"><div class="zk">${z.kicker}</div><div class="zd">${z.desc}</div><div class="zone-rule"></div></div>`;
     if(z.entries.length){
       z.entries.forEach(e=>{
         const paras=e.passage.map(p=>`<p>${p}</p>`).join("");
-        html+=`<article class="entry reveal">
+        html+=`<article class="entry">
           <div class="src">${e.src}</div>
           <div class="hook">${e.hook}</div>
           <div class="passage">${paras}</div>
@@ -234,17 +297,20 @@ const ZONES=[
         </article>`;
       });
     }else{
-      html+=`<div class="zone-soon reveal"><b>敬请期待</b><br>此辑正在拣选——葛亮写人物的神情与心绪，最是细腻入微，容后补录。</div>`;
+      html+=`<div class="zone-soon"><b>敬请期待</b><br>此辑正在拣选——葛亮写人物的神情与心绪，最是细腻入微，容后补录。</div>`;
     }
     sec.innerHTML=html;
     root.appendChild(sec);
   });
 
-  /* 滚动渐显 */
-  const io=new IntersectionObserver((entries)=>{
-    entries.forEach(en=>{if(en.isIntersecting){en.target.classList.add("in");io.unobserve(en.target);}});
-  },{threshold:0.12});
-  document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+  /* 切换 */
+  tabbar.addEventListener("click",ev=>{
+    const btn=ev.target.closest(".tab"); if(!btn) return;
+    const idx=btn.dataset.idx;
+    tabbar.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===btn));
+    root.querySelectorAll(".zone").forEach(s=>s.classList.toggle("active",s.dataset.idx===idx));
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
 })();
 </script>
 

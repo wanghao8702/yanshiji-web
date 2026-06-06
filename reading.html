@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>燕食记 · 字里行间</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4ECE0;--paper-2:#EDE3D4;--ink:#3A2E26;--ink-soft:#6B5B4F;
+    --line-soft:#D8C9B4;--gold:#B8893E;--rust:#C15F3C;--green:#6B7A56;--crimson:#7A2A1A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:"Noto Serif SC",serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.85;}
+
+  .nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;background:rgba(244,236,224,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);}
+  .nav .brand{font-family:"ZCOOL XiaoWei",serif;font-size:22px;letter-spacing:.12em;}
+  .nav .brand small{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.18em;margin-left:10px;text-transform:uppercase;}
+  .nav ul{display:flex;gap:6px;list-style:none;margin:0;padding:0;}
+  .nav a{text-decoration:none;color:var(--ink-soft);padding:6px 16px;border-radius:20px;font-size:15px;transition:.2s;}
+  .nav a:hover{color:var(--ink);background:var(--paper-2);}
+  .nav a.active{color:#fff;background:var(--rust);}
+
+  header.hd{text-align:center;padding:44px 20px 6px;}
+  header.hd .kicker{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.24em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+  header.hd h1{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(28px,4vw,44px);letter-spacing:.12em;margin:0 0 12px;font-weight:400;}
+  header.hd p{margin:0 auto;max-width:640px;color:var(--ink-soft);font-size:15px;line-height:1.8;}
+
+  /* ── 主题分区 ── */
+  .zone{max-width:760px;margin:0 auto;padding:0 26px;}
+  .zone-head{text-align:center;margin:56px 0 6px;}
+  .zone-head .zk{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.26em;color:var(--gold);text-transform:uppercase;}
+  .zone-head h2{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(26px,3.6vw,36px);letter-spacing:.18em;margin:6px 0 6px;font-weight:400;}
+  .zone-head .zd{font-size:13.5px;color:var(--ink-soft);letter-spacing:.04em;}
+  .zone-rule{width:50px;height:2px;background:var(--gold);opacity:.5;margin:14px auto 0;border-radius:2px;}
+
+  /* ── 单条段落 ── */
+  .entry{margin:42px auto 60px;}
+  .entry .src{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.14em;color:var(--gold);
+    text-transform:uppercase;text-align:center;margin-bottom:18px;}
+  .entry .src::before,.entry .src::after{content:"—";opacity:.5;margin:0 10px;}
+  .entry .hook{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(21px,2.8vw,27px);line-height:1.6;
+    color:var(--crimson);text-align:center;letter-spacing:.04em;margin:0 auto 26px;max-width:600px;position:relative;}
+  .entry .hook::before{content:"“";color:var(--gold);opacity:.6;}
+  .entry .hook::after{content:"”";color:var(--gold);opacity:.6;}
+  .entry .passage{background:var(--paper);border:1px solid var(--line-soft);border-radius:14px;
+    padding:26px 30px;box-shadow:0 10px 30px -24px rgba(58,46,38,.6);}
+  .entry .passage p{margin:0 0 14px;font-size:16px;text-align:justify;text-indent:2em;}
+  .entry .passage p:last-child{margin-bottom:0;}
+
+  .entry .review{position:relative;margin:20px 4px 0;padding:18px 22px 18px 24px;
+    background:var(--paper-2);border-left:3px solid var(--gold);border-radius:0 12px 12px 0;}
+  .entry .review .rlabel{font-family:"ZCOOL XiaoWei",serif;font-size:13.5px;letter-spacing:.18em;color:var(--gold);margin-bottom:8px;}
+  .entry .review p{margin:0;font-size:14.5px;line-height:1.85;color:var(--ink);text-align:justify;}
+
+  /* ── 空分区占位 ── */
+  .zone-soon{text-align:center;color:var(--ink-soft);font-size:14px;
+    border:1px dashed var(--line-soft);border-radius:14px;padding:30px 24px;margin:34px auto 0;max-width:520px;}
+  .zone-soon b{font-family:"ZCOOL XiaoWei",serif;color:var(--gold);font-weight:400;letter-spacing:.1em;}
+
+  footer.src{max-width:720px;margin:30px auto 0;padding:0 26px 64px;font-size:12.5px;color:var(--ink-soft);line-height:1.9;text-align:center;}
+  footer.src h4{font-family:"ZCOOL XiaoWei",serif;color:var(--gold);font-size:14px;margin:40px 0 6px;letter-spacing:.1em;}
+
+  /* 滚动渐显 */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  @media (max-width:760px){
+    .nav{padding:12px 16px;}
+    .zone{padding:0 18px;}
+    .entry .passage{padding:20px 18px;}
+    .entry .passage p{font-size:15.5px;}
+  }
+
+  /* ── 背景音乐播放器 ── */
+  .player{position:fixed;bottom:22px;right:22px;z-index:60;display:flex;align-items:center;gap:11px;
+    padding:9px 15px 9px 9px;background:rgba(244,236,224,.92);backdrop-filter:blur(10px);
+    border:1px solid var(--line-soft);border-radius:44px;box-shadow:0 14px 32px -16px rgba(58,46,38,.55);
+    transition:box-shadow .3s ease;}
+  .player:hover{box-shadow:0 18px 38px -16px rgba(58,46,38,.6);}
+  .player .disc{width:46px;height:46px;flex:none;animation:spin 7s linear infinite;animation-play-state:paused;}
+  .player.playing .disc{animation-play-state:running;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .player .pinfo{min-width:80px;max-width:128px;}
+  .player .ptitle{font-family:"ZCOOL XiaoWei",serif;font-size:15px;line-height:1.2;letter-spacing:.04em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .player .psub{font-size:11px;color:var(--ink-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .player .pctrl{display:flex;gap:7px;}
+  .player .pbtn{width:34px;height:34px;flex:none;padding:0;border-radius:50%;cursor:pointer;
+    border:1px solid var(--line-soft);background:var(--paper);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;transition:.2s;}
+  .player .pbtn:hover{background:var(--rust);color:#fff;border-color:var(--rust);}
+  .player .pbtn svg{width:15px;height:15px;display:block;fill:currentColor;}
+  @media (max-width:760px){
+    .player{bottom:14px;right:14px;gap:9px;padding:8px 12px 8px 8px;}
+    .player .pinfo{display:none;}
+    .player .disc{width:40px;height:40px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .player .disc{animation:none!important;}
+    html{scroll-behavior:auto;}
+    .reveal{opacity:1;transform:none;transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand">燕食记 <small>YANSHIJI</small></div>
+  <ul>
+    <li><a href="index.html">欢迎</a></li>
+    <li><a href="characters.html">人物关系</a></li>
+    <li><a href="cuisine.html">书中美食</a></li>
+    <li><a href="reading.html" class="active">字里行间</a></li>
+  </ul>
+</nav>
+
+<header class="hd">
+  <div class="kicker">Between The Lines</div>
+  <h1>字里行间</h1>
+  <p>选《燕食记》里最动人的段落，一段原文，一则随笔。葛亮的文字写味、写人、写时代——读过的人重温，未读的人，愿你由此入席。</p>
+</header>
+
+<main id="zones"></main>
+
+<footer class="src">
+  <h4>关于引文</h4>
+  本页所引为《燕食记》原文段落，仅供阅读欣赏与文学品鉴之用，无商业用途，版权归葛亮及原出版方所有。随笔点评为个人解读，难免偏颇，欢迎读者指正。
+</footer>
+
+<!-- ── 背景音乐播放器 ── -->
+<div class="player" id="player" aria-label="背景音乐播放器">
+  <svg class="disc" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="48" fill="#2E241D" stroke="#B8893E" stroke-width="1.5" opacity=".95"/>
+    <g fill="none" stroke="#5A4A3C" stroke-width="1"><circle cx="50" cy="50" r="40"/><circle cx="50" cy="50" r="33"/><circle cx="50" cy="50" r="26"/></g>
+    <circle cx="50" cy="50" r="18" fill="#B8893E"/>
+    <circle cx="50" cy="50" r="4" fill="#2E241D"/>
+    <text x="50" y="44" font-family="ZCOOL XiaoWei,serif" font-size="13" fill="#2E241D" text-anchor="middle">燕</text>
+  </svg>
+  <div class="pinfo">
+    <div class="ptitle" id="ptitle">彩云追月</div>
+    <div class="psub" id="psub">民乐合奏</div>
+  </div>
+  <div class="pctrl">
+    <button class="pbtn" id="playBtn" type="button" aria-label="播放或暂停">
+      <svg id="iconPlay" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="iconPause" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+    </button>
+    <button class="pbtn" id="nextBtn" type="button" aria-label="下一首">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14l9-7zM16 5h2.5v14H16z"/></svg>
+    </button>
+  </div>
+  <audio id="audio" preload="auto"></audio>
+</div>
+
+<script>
+/* ============ 数据：主题分区 → 段落 ============ */
+const ZONES=[
+  {
+    name:"承味", kicker:"Inheritance", desc:"手艺的来路与传承",
+    entries:[
+      {
+        src:"莲蓉月饼 · 得月阁旧事",
+        hook:"第一次，他被一款看似普通的莲蓉月饼所震动。",
+        passage:[
+          "赵守智，或河川守智，在旁边微笑着，看锡堃与宋子游吃下了整只月饼，他才佯装收拾好了胡琴，开始小心品尝。",
+          "有一种味道在他的舌尖上打击了一下，齿颊间忽而流出了津液。他心里暗暗吃惊，他想，这种感觉，似乎在他的童年记忆之后，就再也没有过了。毫无疑问，这是一只非常好吃的月饼。来中国这些年，他吃过不少月饼。稻香村的京式自来白、自来红，知味观的苏式鲜肉酥皮，乃至潮式饼、清油饼、广式月饼，更是遍尝五仁、金腿、豆沙、蛋黄到枣泥。可是，第一次，他被一款看似普通的莲蓉月饼所震动。他想，七少爷说缺了一味，是缺了什么。",
+          "他想起了听过的那个传说，有关得月阁，也有关早已经失传的双蓉月饼。风驰电掣地，又想起那个不知何踪的大按师傅。他看了一眼阿响，默然想，这孩子，到底没有辜负自己的等待。"
+        ],
+        review:"一只看似普通的莲蓉月饼，写的却是味觉如何唤回童年、手艺如何完成传承。葛亮不正面写阿响怎样苦练，只借一个异乡人舌尖上那一下「震动」——齿颊间忽然涌出的津液，把多年遍尝南北名点的舌头，一举拉回到记忆最深处。失传的双蓉、无踪的大按师傅、默然的赵守智，三条暗线在一口饼里交汇。所谓传承，原来不必声张，自有人在等待，也自有人没有辜负这份等待。"
+      },
+      {
+        src:"辣酱月饼 · 戴明义与柳素娥",
+        hook:"外头一轮圆月，抿一口花雕。天上人间，不知今夕何年。",
+        passage:[
+          "婚后感情甚笃，柳素娥是家务劳作的一把好手，只是美中不足，不善庖厨。戴明义倒不觉得缺憾，因为这正是他的所长。出身浦东三林的明义，早年失怙，自力更生惯了，又与邻里一个烧本帮菜的老厨师成了忘年交。川沙、三林一带镇上有操办红白喜事的，进学宴请的，老师傅掌勺，他便也去帮厨。久而久之，早就锻炼了一手好厨艺。只是以往一个人，不得施展。如今组了家庭，也正有了用武之地。他便换着样地给素娥烧菜，有老厨「铲刀帮」的经验，又加入了自己的许多心得。做妻的便有了口福。两个人的小日子也因此多了滋味与盼头。那时节的上海人吃菜靠时令，本帮菜的烧法又平易近人。如大多老城厢的家庭，四季的食材，明义便也都算是信手拈来。春季的油焖笋、草头圈子，是将清爽与膏腴相得益彰；夏天人内外湿滞，便用糟法开胃。鱼蟹虾贝、毛豆茭白、花生面筋，全可以拿来糟一下。糟法大同小异，而各曲尽其妙；秋冬要补，一个浓油赤酱，考的是火候功夫。多少好吃不好吃的，一焖一煨，都能够化腐朽为神奇。",
+          "明义呢，长处是因材制宜。素娥的口味浓厚，爱吃一道八宝辣酱。本是不起眼的家常菜，不过是将虾仁、鸡丁、肉丁、花生米、鸭肫片、笋丁用豆瓣酱炒在一起，无甚出奇。可他来做，平日有平日的朴质，节庆便有节庆的气派。沪上到了中秋，吃的也是酥皮的苏式月饼。明义便跟那做点心的师傅，求酥皮的制法，实验了多次，终于成了。自己用辣酱做馅儿，做成了独他一份的辣酱月饼，给素娥吃。看妻吃得高兴，他心里也便说不出的适意。外头一轮圆月，抿一口花雕。天上人间，不知今夕何年。"
+        ],
+        review:"戴明义的好手艺，来路是一位烧本帮菜的老厨——「铲刀帮」的经验，加上自己多年的心得，全收在这一段里。葛亮写家常，不写珍馐，只写时令：春的油焖笋、夏的糟味、秋冬的浓油赤酱，一焖一煨，便见功夫。而最动人的是那只辣酱月饼——本登不上大雅的八宝辣酱，被他酿进苏式酥皮，做成独一份的心意。看妻吃得高兴，他心里「说不出的适意」。寻常一餐一饭里，藏着手艺，也藏着情意；末句「不知今夕何年」，更把一桌家常，写出了天上人间的温柔。"
+      }
+    ]
+  },
+  {
+    name:"古韵", kicker:"Antiquity", desc:"遣词造句里的古意",
+    entries:[
+      {
+        src:"上阕·第九章 烽火硝烟",
+        hook:"你要是能拉开，小观山门可就敞开了。",
+        passage:[
+          "团长就叫上段老板，抬上几个伤兵。到村尾，果然是一座道观，虽然败落，但看得出许多年前，也曾经是繁盛的。观内可见一座古塔，在这小村，如鹤立其中。团长便去敲门。敲了许久，出来一个老道士，张了一眼，就要关上门。",
+          "段老板眼疾手快，挡住门说，这位道长，且听我一句。",
+          "里头仍是把着门，瓮声道，本观不涉兵刃。各位请回吧。",
+          "段老板道，普天之下，哪里有人天生就是个兵呢。不为国难，谁愿舞刀弄枪。",
+          "里头便冷笑，看你的身架，就是个从小练武的吧。",
+          "段老板愣一下，说，我其实是个唱戏的。",
+          "里头便问，唱什么行。",
+          "段老板说，自然是武行。",
+          "那门竟然开了。老道士出来了，并无仙风道骨。阿响看他，只觉得十分老，却看不出年纪。头发掉得只剩下脑后的一个发髻，脑门却很宽大。身上的道袍，也是很破旧的，靠肩膀的地方，竟缀着蓝印花布的补丁。他袖着手，看一下四周，道，既然是武行，我就试你一试。",
+          "他便反身回观里去。未几，拿出了一张大弓。他将这张弓递到段老板手中，说，少说有六百斤。你要是能拉开，小观山门可就敞开了。",
+          "段老板将弓拿到手里，沉甸甸的。举手便拉，那弓纹丝不动。道士便要将弓拿回来，说，这弓在小观放了十多年，就没人拉开过。请回吧。",
+          "段老板说，且慢。他便放下了弓，在空地上先打了一套形意拳。慢慢地收势，气沉丹田。再接过弓，竟慢慢拉开了。拉了一个满弓。",
+          "旁边的人屏息看着，这时候纷纷叫好。那道士捋一下胡子，也不多说话，便将道观的大门打开了，做了个「请」的姿势。"
+        ],
+        review:"这一段最见葛亮的「古意」——读来竟像一部武侠小说。不过是想借道观歇脚、安置伤员，老道士却出一道难题：拉开六百斤的大弓，方许入门。一拉不动，一套形意拳收势、气沉丹田，再拉竟成满弓。你来我往的对白短促工整，省去一切修饰，全是骨头；「我就试你一试」的较量、屏息与喝彩、捋须一请的从容，处处是旧白话小说的气口。写的是抗战烽火，落笔却是江湖规矩与人的筋骨——遣词造句的扎实，正藏在这份举重若轻里。"
+      }
+    ]
+  },
+  {
+    name:"入微", kicker:"Nuance", desc:"人物细节与心情的细致描写",
+    entries:[]
+  }
+];
+
+/* ============ 渲染 ============ */
+(function(){
+  const root=document.getElementById("zones");
+  ZONES.forEach(z=>{
+    const sec=document.createElement("section");
+    sec.className="zone";
+    let html=`<div class="zone-head reveal"><div class="zk">${z.kicker}</div><h2>${z.name}</h2><div class="zd">${z.desc}</div><div class="zone-rule"></div></div>`;
+    if(z.entries.length){
+      z.entries.forEach(e=>{
+        const paras=e.passage.map(p=>`<p>${p}</p>`).join("");
+        html+=`<article class="entry reveal">
+          <div class="src">${e.src}</div>
+          <div class="hook">${e.hook}</div>
+          <div class="passage">${paras}</div>
+          <div class="review"><div class="rlabel">随笔</div><p>${e.review}</p></div>
+        </article>`;
+      });
+    }else{
+      html+=`<div class="zone-soon reveal"><b>敬请期待</b><br>此辑正在拣选——葛亮写人物的神情与心绪，最是细腻入微，容后补录。</div>`;
+    }
+    sec.innerHTML=html;
+    root.appendChild(sec);
+  });
+
+  /* 滚动渐显 */
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{if(en.isIntersecting){en.target.classList.add("in");io.unobserve(en.target);}});
+  },{threshold:0.12});
+  document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+})();
+</script>
+
+<script>
+/* ── 背景音乐:三首循环播放（与全站一致，跨页续播）── */
+(function(){
+  const tracks=[
+    {src:"music/中国广播民族乐团 - 彩云追月(民乐合奏).mp3", title:"彩云追月", sub:"民乐合奏"},
+    {src:"music/华夏民族乐团 - 雨打芭蕉 (广东音乐).mp3",   title:"雨打芭蕉", sub:"广东音乐"},
+    {src:"music/红线女 - 荔枝颂.mp3",                       title:"荔枝颂",   sub:"红线女 · 粤曲"}
+  ];
+  const audio=document.getElementById("audio"),
+        player=document.getElementById("player"),
+        ptitle=document.getElementById("ptitle"),
+        psub=document.getElementById("psub"),
+        iconPlay=document.getElementById("iconPlay"),
+        iconPause=document.getElementById("iconPause");
+  const KEY="yanshiji_music";
+  let idx=0, seekTo=0, wantPlay=true;
+  try{ const s=JSON.parse(localStorage.getItem(KEY)||"null");
+       if(s){ idx=s.idx|0; seekTo=s.time||0; wantPlay=s.playing!==false; } }catch(e){}
+
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify({idx,time:audio.currentTime||0,playing:!audio.paused})); }catch(e){} }
+
+  function load(i,seek){
+    idx=(i%tracks.length+tracks.length)%tracks.length;
+    audio.src=encodeURI(tracks[idx].src);
+    ptitle.textContent=tracks[idx].title;
+    psub.textContent=tracks[idx].sub;
+    const t=seek||0;
+    if(t>0) audio.addEventListener("loadedmetadata",()=>{ try{audio.currentTime=t;}catch(e){} },{once:true});
+  }
+
+  audio.addEventListener("ended",()=>{ load(idx+1,0); audio.play().catch(()=>{}); });
+  audio.addEventListener("play",()=>{ player.classList.add("playing"); iconPlay.style.display="none"; iconPause.style.display=""; save(); });
+  audio.addEventListener("pause",()=>{ player.classList.remove("playing"); iconPlay.style.display=""; iconPause.style.display="none"; save(); });
+  let lastSave=0;
+  audio.addEventListener("timeupdate",()=>{ const n=Date.now(); if(n-lastSave>1000){ lastSave=n; save(); } });
+  window.addEventListener("pagehide",save);
+
+  document.getElementById("playBtn").addEventListener("click",()=>{ if(audio.paused) audio.play().catch(()=>{}); else audio.pause(); });
+  document.getElementById("nextBtn").addEventListener("click",()=>{ load(idx+1,0); audio.play().catch(()=>{}); });
+
+  load(idx,seekTo);
+  if(wantPlay){
+    audio.play().catch(()=>{
+      const start=()=>{ audio.play().catch(()=>{}); evs.forEach(e=>window.removeEventListener(e,start)); };
+      const evs=["pointerdown","keydown","touchstart","scroll"];
+      evs.forEach(e=>window.addEventListener(e,start,{passive:true}));
+    });
+  }
+})();
+</script>
+</body>
+</html>

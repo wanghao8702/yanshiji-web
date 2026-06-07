@@ -6,6 +6,5 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# 内部文档,不公开
-燕食记网站_PRD_v1.0_终版.md
+# 内部文档,不公开（统一放在 docs/ 目录，不单独列举）
 docs/

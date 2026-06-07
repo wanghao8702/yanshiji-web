@@ -8,3 +8,6 @@ Thumbs.db
 
 # 内部文档,不公开（统一放在 docs/ 目录，不单独列举）
 docs/
+
+# 本地截图,不公开
+screenshots/
